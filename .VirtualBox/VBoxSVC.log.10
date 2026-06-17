@@ -1,0 +1,150 @@
+00:00:00.003282 main     VirtualBox COM Server 7.1.12 r169651 win.amd64 (Jul 14 2025 14:22:58) release log
+00:00:00.003284 main     Log opened 2025-08-30T18:32:53.596032100Z
+00:00:00.003285 main     Build Type: release
+00:00:00.003291 main     OS Product: Windows 11
+00:00:00.003292 main     OS Release: 10.0.26100
+00:00:00.003293 main     OS Service Pack: 
+00:00:00.047587 main     DMI Product Name: Nitro ANV15-41
+00:00:00.063110 main     DMI Product Version: V1.15
+00:00:00.063124 main     Firmware type: UEFI
+00:00:00.063916 main     Secure Boot: Disabled
+00:00:00.063932 main     Host RAM: 15676MB (15.3GB) total, 3579MB (3.4GB) available
+00:00:00.063936 main     Executable: C:\Program Files\Oracle\VirtualBox\VBoxSVC.exe
+00:00:00.063937 main     Process ID: 31980
+00:00:00.063937 main     Package type: WINDOWS_64BITS_GENERIC
+00:00:00.063939 main     Windows Features:
+00:00:00.063940 main       Core Isolation (Memory Integrity): ENABLED
+00:00:00.139572          VirtualBox: object creation starts
+00:00:00.139841          Home directory: 'C:\Users\sanje\.VirtualBox'
+00:00:00.140195          Installed Drivers:
+00:00:00.162179          Loading settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml" with version "1.12-windows"
+00:00:00.168426          usbLibGetDevices: Starting USB device enumeration
+00:00:00.208111          Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&7e3cb49&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 3
+00:00:00.254410          Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&16849e8c&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 1
+00:00:00.256907          usbLibGetDevices: Found 2 USB devices, 0 captured
+00:00:00.256973          USB: Unknown USB device detected (idVendor: 0x0408, idProduct: 0x4053)
+00:00:00.257612          USB: Unknown USB device detected (idVendor: 0x13d3, idProduct: 0x3606)
+00:00:00.367408          HostDnsMonitor: initializing
+00:00:00.383892          HostDnsMonitor: updating information
+00:00:00.383923          HostDnsMonitor: old information
+00:00:00.383923            no server entries
+00:00:00.383924            no domain set
+00:00:00.383924            no search string entries
+00:00:00.383925          HostDnsMonitor: new information
+00:00:00.383925            server 1: 10.190.191.218
+00:00:00.383925            no domain set
+00:00:00.383926            no search string entries
+00:00:00.386120          VD: VDInit finished with VINF_SUCCESS
+00:00:00.485912          Platform architecture set to 'x86'
+00:00:00.486398          Loading settings file "C:\Users\sanje\VirtualBox VMs\kali linux\kali linux.vbox" with version "1.19-windows"
+00:00:00.486632          Platform architecture set to 'x86'
+00:00:00.505347          OCI: Local config file 'C:\Users\sanje\.VirtualBox\oci_config' does not exist
+00:00:00.505422          OCI: Original config file 'C:\Users\sanje\.oci\config' does not exist
+00:00:00.505423          OCI: Reading profiles finished with status ERROR_SUCCESS
+00:00:00.505439          ExtPack: Created cloud provider 'OCI' (hrc=ERROR_SUCCESS)
+00:00:00.505505          VirtualBox: object created
+00:00:00.664357          Saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml" with version "1.12-windows"
+00:00:00.667289          Finished saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml"
+00:00:00.667449          Saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml" with version "1.12-windows"
+00:00:00.669598          Finished saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml"
+00:00:00.669851          Saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml" with version "1.12-windows"
+00:00:00.672022          Finished saving settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml"
+00:00:01.515218          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+00:00:01.609716          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is PoweredOff)}, preserve=false aResultDetail=0
+00:00:03.941514          Launched VM: 4275934512 pid: 77168 (0x12d70) frontend: GUI/Qt name: kali linux
+00:00:03.995293          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+00:00:04.025962          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is PoweredOff)}, preserve=false aResultDetail=0
+00:00:09.688315          Platform architecture set to 'x86'
+00:00:09.887390          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+00:00:09.889898          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is PoweredOff)}, preserve=false aResultDetail=0
+00:00:10.668772          Load [C:\Program Files\Oracle\VirtualBox\ExtensionPacks\Oracle_VirtualBox_Extension_Pack\win.amd64\VBoxHostWebcam.DLL] vrc=VINF_SUCCESS
+00:00:10.734509          ERROR [COM]: aRC=E_FAIL (0x80004005) aIID={bea3ef5c-de2f-4b74-aa3a-15d6249371a0} aComponent={RecordingSettingsWrap} aText={Recording not started}, preserve=false aResultDetail=0
+00:00:11.950860          ERROR [COM]: aRC=E_FAIL (0x80004005) aIID={bea3ef5c-de2f-4b74-aa3a-15d6249371a0} aComponent={RecordingSettingsWrap} aText={Recording not started}, preserve=false aResultDetail=0
+00:00:11.969500          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={SessionMachine} aText={The machine is not mutable or saved (state is Starting)}, preserve=false aResultDetail=0
+00:00:11.970483          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+00:00:11.986066          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is Starting)}, preserve=false aResultDetail=0
+00:00:12.004396          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={SessionMachine} aText={The machine is not mutable or saved (state is Starting)}, preserve=false aResultDetail=0
+00:00:13.639269          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={7d510820-a678-4730-a862-818dcd3fbed0} aComponent={MediumWrap} aText={Property 'CRYPT/KeyId' does not exist}, preserve=false aResultDetail=0
+00:00:13.639785          HostDnsMonitorProxy::GetDomainName: no domain set
+00:00:13.639847          HostDnsMonitorProxy::GetNameServers:
+00:00:13.639853            name server 1: 10.190.191.218
+00:00:13.639888          HostDnsMonitorProxy::GetSearchStrings:
+00:00:13.639892            no search string entries
+00:00:13.640441          Added USB filter (ID=1, type=4) for device FFFFFFFF:FFFFFFFF rev FFFFFFFF, c/s/p FFFFFFFF/FFFFFFFF/FFFFFFFF, Manufacturer=`<null>' Product=`<null>' Serial=`<null>'
+00:00:15.011614          ERROR [COM]: aRC=E_FAIL (0x80004005) aIID={bea3ef5c-de2f-4b74-aa3a-15d6249371a0} aComponent={RecordingSettingsWrap} aText={Recording not started}, preserve=false aResultDetail=0
+00:00:15.050147          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+00:00:15.072858          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is Running)}, preserve=false aResultDetail=0
+00:00:37.103733 dns-monitor HostDnsMonitor: updating information
+00:00:37.103777 dns-monitor HostDnsMonitor: unchanged
+00:02:18.237160 dns-monitor HostDnsMonitor: updating information
+00:02:18.237194 dns-monitor HostDnsMonitor: unchanged
+00:08:21.177307 dns-monitor HostDnsMonitor: updating information
+00:08:21.177344 dns-monitor HostDnsMonitor: unchanged
+00:17:28.388874 dns-monitor HostDnsMonitor: updating information
+00:17:28.388904 dns-monitor HostDnsMonitor: unchanged
+00:18:12.652345 USBPROXY usbLibGetDevices: Starting USB device enumeration
+00:18:12.680950 USBPROXY Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&7e3cb49&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 3
+00:18:12.711227 USBPROXY Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&16849e8c&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 1
+00:18:12.734371 USBPROXY usbLibGetDevices: Found 2 USB devices, 0 captured
+00:20:33.055252 dns-monitor HostDnsMonitor: updating information
+00:20:33.055272 dns-monitor HostDnsMonitor: unchanged
+00:32:38.145466 dns-monitor HostDnsMonitor: updating information
+00:32:38.145717 dns-monitor HostDnsMonitor: unchanged
+01:40:08.984321 dns-monitor HostDnsMonitor: updating information
+01:40:08.984354 dns-monitor HostDnsMonitor: unchanged
+03:38:22.742797 dns-monitor HostDnsMonitor: updating information
+03:38:22.742851 dns-monitor HostDnsMonitor: unchanged
+03:38:26.516378 dns-monitor HostDnsMonitor: updating information
+03:38:26.516414 dns-monitor HostDnsMonitor: unchanged
+03:38:28.412006 MainPower Host suspending: Paused 1 VMs
+03:38:28.459159          ERROR [COM]: aRC=E_FAIL (0x80004005) aIID={bea3ef5c-de2f-4b74-aa3a-15d6249371a0} aComponent={RecordingSettingsWrap} aText={Recording not started}, preserve=false aResultDetail=0
+03:38:28.504149          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+03:38:28.509760          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is Paused)}, preserve=false aResultDetail=0
+13:04:17.963369 MainPower Host resumed: Resumed 1 VMs
+13:04:18.588050 USBPROXY usbLibGetDevices: Starting USB device enumeration
+13:04:18.720646 USBPROXY usbLibGetDevices: Found 2 USB devices, 0 captured
+13:04:18.803919          ERROR [COM]: aRC=E_FAIL (0x80004005) aIID={bea3ef5c-de2f-4b74-aa3a-15d6249371a0} aComponent={RecordingSettingsWrap} aText={Recording not started}, preserve=false aResultDetail=0
+13:04:19.163675          ERROR [COM]: aRC=VBOX_E_OBJECT_NOT_FOUND (0x80bb0001) aIID={5bfd8965-b81b-469f-8649-f717ce97a5d5} aComponent={NvramStoreWrap} aText={The UEFI NVRAM file is not existing for this machine}, preserve=false aResultDetail=0
+13:04:19.178677          ERROR [COM]: aRC=VBOX_E_INVALID_VM_STATE (0x80bb0002) aIID={e36a5081-a82a-40bd-9e4e-42a44d6ce50f} aComponent={MachineWrap} aText={The machine is not mutable, saved or running (state is Running)}, preserve=false aResultDetail=0
+13:04:19.898848 dns-monitor HostDnsMonitor: updating information
+13:04:19.898917 dns-monitor HostDnsMonitor: old information
+13:04:19.898927 dns-monitor   server 1: 10.190.191.218
+13:04:19.898935 dns-monitor   no domain set
+13:04:19.898941 dns-monitor   no search string entries
+13:04:19.898946 dns-monitor HostDnsMonitor: new information
+13:04:19.898950 dns-monitor   no server entries
+13:04:19.898955 dns-monitor   no domain set
+13:04:19.898959 dns-monitor   no search string entries
+13:04:19.902876          HostDnsMonitorProxy::GetDomainName: no domain set
+13:04:19.903062          HostDnsMonitorProxy::GetNameServers:
+13:04:19.903084            no name server entries
+13:04:19.903315          HostDnsMonitorProxy::GetSearchStrings:
+13:04:19.903337            no search string entries
+13:04:32.167011 dns-monitor HostDnsMonitor: updating information
+13:04:32.167036 dns-monitor HostDnsMonitor: old information
+13:04:32.167041 dns-monitor   no server entries
+13:04:32.167044 dns-monitor   no domain set
+13:04:32.167046 dns-monitor   no search string entries
+13:04:32.167049 dns-monitor HostDnsMonitor: new information
+13:04:32.167052 dns-monitor   server 1: 10.92.215.8
+13:04:32.167055 dns-monitor   no domain set
+13:04:32.167057 dns-monitor   no search string entries
+13:04:32.167482          HostDnsMonitorProxy::GetDomainName: no domain set
+13:04:32.167547          HostDnsMonitorProxy::GetNameServers:
+13:04:32.167557            name server 1: 10.92.215.8
+13:04:32.167618          HostDnsMonitorProxy::GetSearchStrings:
+13:04:32.167628            no search string entries
+13:04:35.303905 dns-monitor HostDnsMonitor: updating information
+13:04:35.303937 dns-monitor HostDnsMonitor: unchanged
+13:06:07.105130 USBPROXY usbLibGetDevices: Starting USB device enumeration
+13:06:07.137368 USBPROXY Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&7e3cb49&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 3
+13:06:07.168768 USBPROXY Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&16849e8c&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 1
+13:06:07.180794 USBPROXY usbLibGetDevices: Found 2 USB devices, 0 captured
+13:06:07.182654 USBPROXY USB: Unknown USB device detected (idVendor: 0x0408, idProduct: 0x4053)
+13:06:07.186945 USBPROXY USB: Unknown USB device detected (idVendor: 0x13d3, idProduct: 0x3606)
+13:14:14.139156 USBPROXY usbLibGetDevices: Starting USB device enumeration
+13:14:14.200877 USBPROXY Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&16849e8c&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 1
+13:14:14.247093 USBPROXY usbLibGetDevices: Found 2 USB devices, 0 captured
+13:16:16.788631 main     WM_QUERYENDSESSION: shutdown (0x00000000)
+13:16:16.789294 main     VBoxSvc has active connections: bActivity = false, lock count = 2
+13:16:20.334140 main     WM_ENDSESSION: critical (TRUE/0x40000000)

@@ -1,0 +1,186 @@
+/* PremiumPhone.module.css */
+
+.phoneWrapper {
+  position: relative;
+  width: 340px;
+  height: 680px;
+  border-radius: 54px;
+  background: linear-gradient(135deg, #1c1c1e 0%, #0a0a0c 100%);
+  padding: 14px;
+  box-shadow: 
+    -20px -20px 60px rgba(255, 255, 255, 0.02),
+    30px 30px 80px rgba(0, 0, 0, 0.6),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.1),
+    inset 2px 2px 6px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
+  will-change: transform;
+  /* Subtle floating animation */
+  animation: floatPhone 6s ease-in-out infinite;
+  margin: 0 auto;
+}
+
+@keyframes floatPhone {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Premium edge finish / Glass reflections */
+.phoneWrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 54px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Glare effect */
+.phoneWrapper::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-20deg);
+  animation: shine 8s infinite;
+  pointer-events: none;
+  z-index: 21;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.phoneScreen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 42px;
+  background-color: #0B1021;
+  overflow: hidden;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+}
+
+.dynamicIsland {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 32px;
+  background-color: #000;
+  border-radius: 20px;
+  z-index: 10;
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.camera {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #444, #050505);
+}
+
+.sensor {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #050505;
+}
+
+/* App Header styling inside screen */
+.appHeader {
+  padding: 55px 24px 20px;
+  background: linear-gradient(180deg, rgba(17, 24, 39, 1) 0%, rgba(11, 16, 33, 1) 100%);
+  color: white;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+.appTitle {
+  font-family: 'Gambarino', serif;
+  font-size: 1.6rem;
+  color: #D4AF37;
+  margin: 0;
+}
+
+.appSubtitle {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+/* Screen Content Area */
+.screenContent {
+  flex: 1;
+  padding: 24px 20px;
+  background-color: #FAF8F3;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for clean look */
+.screenContent::-webkit-scrollbar {
+  display: none;
+}
+.screenContent {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Notification Item Styling */
+.notification {
+  background: white;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(11, 16, 33, 0.06);
+  border-left: 4px solid #D4AF37;
+  flex-shrink: 0;
+}
+
+.notifTime {
+  font-size: 0.75rem;
+  color: #D4AF37;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.notifTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0B1021;
+  margin-bottom: 4px;
+}
+
+.notifDesc {
+  font-size: 0.85rem;
+  color: rgba(11, 16, 33, 0.65);
+  line-height: 1.5;
+}
+
+/* Home Bar */
+.homeBar {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 5px;
+  background-color: rgba(11, 16, 33, 0.25);
+  border-radius: 5px;
+  z-index: 10;
+}

@@ -1,0 +1,5 @@
+/* Minimal reset - only fix browser default spacing */
+
+body {
+  margin: 0;
+}

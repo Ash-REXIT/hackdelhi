@@ -1,0 +1,59 @@
+00:00:00.005782 main     VirtualBox COM Server 7.1.12 r169651 win.amd64 (Jul 14 2025 14:22:58) release log
+00:00:00.005785 main     Log opened 2026-02-25T04:17:02.596298600Z
+00:00:00.005785 main     Build Type: release
+00:00:00.005791 main     OS Product: Windows 11
+00:00:00.005792 main     OS Release: 10.0.26200
+00:00:00.005793 main     OS Service Pack: 
+00:00:00.046103 main     DMI Product Name: Nitro ANV15-41
+00:00:00.064361 main     DMI Product Version: V1.20
+00:00:00.064653 main     Firmware type: UEFI
+00:00:00.065332 main     Secure Boot: Disabled
+00:00:00.065349 main     Host RAM: 15676MB (15.3GB) total, 8919MB (8.7GB) available
+00:00:00.065355 main     Executable: C:\Program Files\Oracle\VirtualBox\VBoxSVC.exe
+00:00:00.065355 main     Process ID: 19468
+00:00:00.065356 main     Package type: WINDOWS_64BITS_GENERIC
+00:00:00.065566 main     Windows Features:
+00:00:00.065567 main       Core Isolation (Memory Integrity): ENABLED
+00:00:00.174393          VirtualBox: object creation starts
+00:00:00.175335          Home directory: 'C:\Users\sanje\.VirtualBox'
+00:00:00.175851          Installed Drivers:
+00:00:00.230277          Loading settings file "C:\Users\sanje\.VirtualBox\VirtualBox.xml" with version "1.12-windows"
+00:00:00.235581          usbLibGetDevices: Starting USB device enumeration
+00:00:00.272642          Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&7e3cb49&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 3
+00:00:00.320853          Getting USB descriptor (id 0) failed (dwErr=31) on hub USB#ROOT_HUB30#5&16849e8c&0&0#{f18a0e88-c30c-11d0-8815-00a0c906bed8} port 1
+00:00:00.339403          usbLibGetDevices: Found 2 USB devices, 0 captured
+00:00:00.340510          USB: Unknown USB device detected (idVendor: 0x0408, idProduct: 0x4053)
+00:00:00.341662          USB: Unknown USB device detected (idVendor: 0x13d3, idProduct: 0x3606)
+00:00:00.422866          HostDnsMonitor: initializing
+00:00:00.451784          HostDnsMonitor: updating information
+00:00:00.477120          HostDnsMonitor: old information
+00:00:00.477124            no server entries
+00:00:00.477126            no domain set
+00:00:00.477127            no search string entries
+00:00:00.477128          HostDnsMonitor: new information
+00:00:00.477128            server 1: 10.184.8.105
+00:00:00.477130            no domain set
+00:00:00.477131            no search string entries
+00:00:00.497584          VD: VDInit finished with VINF_SUCCESS
+00:00:00.695755          Platform architecture set to 'x86'
+00:00:00.716322          Loading settings file "C:\Users\sanje\VirtualBox VMs\kali linux\kali linux.vbox" with version "1.19-windows"
+00:00:00.718149          Platform architecture set to 'x86'
+00:00:00.751524          OCI: Local config file 'C:\Users\sanje\.VirtualBox\oci_config' does not exist
+00:00:00.751765          OCI: Original config file 'C:\Users\sanje\.oci\config' does not exist
+00:00:00.751767          OCI: Reading profiles finished with status ERROR_SUCCESS
+00:00:00.752395          ExtPack: Created cloud provider 'OCI' (hrc=ERROR_SUCCESS)
+00:00:00.752511          VirtualBox: object created
+00:00:09.438994 dns-monitor HostDnsMonitor: updating information
+00:00:09.439041 dns-monitor HostDnsMonitor: unchanged
+00:00:12.793041 dns-monitor HostDnsMonitor: updating information
+00:00:12.793074 dns-monitor HostDnsMonitor: unchanged
+00:00:14.908718 dns-monitor HostDnsMonitor: updating information
+00:00:14.908754 dns-monitor HostDnsMonitor: unchanged
+00:00:22.866081 dns-monitor HostDnsMonitor: updating information
+00:00:22.866111 dns-monitor HostDnsMonitor: unchanged
+00:00:22.947898 main     VirtualBox: object deletion starts
+00:00:22.948524 main     ERROR [COM]: aRC=VBOX_E_OBJECT_IN_USE (0x80bb000c) aIID={7d510820-a678-4730-a862-818dcd3fbed0} aComponent={MediumWrap} aText={Medium 'C:\Users\sanje\VirtualBox VMs\kali linux\kali linux.vdi' cannot be closed because it is still attached to 1 virtual machines}, preserve=false aResultDetail=0
+00:00:22.951476 main     HostDnsMonitor: shutting down ...
+00:00:22.951620 main     HostDnsMonitor: shut down
+00:00:22.954101 Watcher  ERROR [COM]: aRC=E_ACCESSDENIED (0x80070005) aIID={d644ad1e-c501-4fc7-9ab6-aa6d763bc540} aComponent={VirtualBoxWrap} aText={The object is not ready}, preserve=false aResultDetail=0
+00:00:22.954468 main     VirtualBox: object deleted
