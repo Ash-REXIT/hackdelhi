@@ -111,7 +111,7 @@ export function Reports() {
               <div className="flex-1 flex flex-col justify-center space-y-6">
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-foreground">High Confidence (>95%)</span>
+                    <span className="font-medium text-foreground">High Confidence ({'>'}95%)</span>
                     <span className="text-muted-foreground">82%</span>
                   </div>
                   <div className="w-full bg-panel rounded-full h-2">
@@ -129,7 +129,7 @@ export function Reports() {
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-foreground">Low Confidence (<80%)</span>
+                    <span className="font-medium text-foreground">Low Confidence ({'<'}80%)</span>
                     <span className="text-muted-foreground">4%</span>
                   </div>
                   <div className="w-full bg-panel rounded-full h-2">

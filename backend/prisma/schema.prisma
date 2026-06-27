@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  FINOPS
+  FINANCE
+}
+
+enum TimesheetStatus {
+  UPLOADED
+  OCR_PROCESSING
+  OCR_COMPLETED
+  EXTRACTING
+  EXTRACTED
+  MATCHING
+  MATCHED
+  VALIDATING
+  VALIDATED
+  FRAUD_CHECKING
+  FRAUD_CHECKED
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  INVOICE_GENERATED
+  PENDING_FINANCE_APPROVAL
+  FINANCE_APPROVED
+  DISPATCHED
+  DELIVERED
+  PAID
+  EXCEPTION
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING_CLIENT_APPROVAL
+  CLIENT_APPROVED
+  CLIENT_REJECTED
+  PENDING_FINANCE_APPROVAL
+  FINANCE_APPROVED
+  FINANCE_REJECTED
+  MODIFIED
+  DISPATCHED
+  DELIVERED
+  PAID
+  CANCELLED
+}
+
+enum QueryStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      UserRole @default(CLIENT)
+  googleId  String?  @unique
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs     AuditLog[]
+  chatHistory   ChatHistory[]
+  clientQueries ClientQuery[]
+
+  @@index([clientId])
+  @@index([role])
+  @@map("users")
+}
+
+model Client {
+  id         String   @id @default(uuid())
+  clientCode String   @unique
+  name       String
+  email      String?
+  phone      String?
+  address    String?
+  city       String?
+  industry   String?
+  status     String?
+  currency   String   @default("AED")
+  taxRate    Decimal  @default(0) @db.Decimal(5, 2)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  users             User[]
+  employees         Employee[]
+  timesheets        Timesheet[]
+  invoices          Invoice[]
+  invoiceRules      InvoiceRule[]
+  validationRules   ValidationRule[]
+  clientQueries     ClientQuery[]
+
+  @@map("clients")
+}
+
+model Employee {
+  id               String    @id @default(uuid())
+  employeeId       String
+  name             String
+  email            String?
+  clientId         String
+  client           Client    @relation(fields: [clientId], references: [id])
+  designation      String?
+  department       String?
+  nationality      String?
+  dateOfJoining    DateTime?
+  iban             String?
+  totalCtc         Decimal?  @db.Decimal(12, 2)
+  salaryComponents Json?
+  hourlyRate       Decimal?  @db.Decimal(10, 2)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  payroll          Payroll[]
+  timesheets       Timesheet[]
+  timesheetEntries TimesheetEntry[]
+
+  @@unique([clientId, employeeId])
+  @@index([name])
+  @@map("employees")
+}
+
+model Payroll {
+  id             String   @id @default(uuid())
+  employeeId     String
+  employee       Employee @relation(fields: [employeeId], references: [id])
+  period         String
+  baseSalary     Decimal  @db.Decimal(12, 2)
+  gross          Decimal? @db.Decimal(12, 2)
+  overtimeAmount Decimal? @db.Decimal(12, 2)
+  deductions     Decimal? @db.Decimal(12, 2)
+  netPay         Decimal? @db.Decimal(12, 2)
+  hourlyRate     Decimal? @db.Decimal(10, 2)
+  overtimeRate   Decimal? @db.Decimal(10, 2)
+  currency       String   @default("AED")
+  workingDays    Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([employeeId, period])
+  @@index([period])
+  @@map("payroll")
+}
+
+model Timesheet {
+  id                String          @id @default(uuid())
+  clientId          String
+  client            Client          @relation(fields: [clientId], references: [id])
+  employeeId        String?
+  employee          Employee?       @relation(fields: [employeeId], references: [id])
+  status            TimesheetStatus @default(UPLOADED)
+  payrollPeriod     String?
+  workingDays       Int?
+  overtime          Decimal?        @db.Decimal(8, 2)
+  reimbursements    Decimal?        @db.Decimal(12, 2)
+  overallConfidence Decimal?        @db.Decimal(5, 2)
+  extractedData     Json?
+  fieldConfidence   Json?
+  validationResults Json?
+  fraudScore        Decimal?        @db.Decimal(5, 2)
+  fraudRiskLevel    String?
+  fraudReasons      Json?
+  exceptionReason   String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  processedAt       DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  documents TimesheetDocument[]
+  entries   TimesheetEntry[]
+  invoices  Invoice[]
+  fraudLogs FraudLog[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([payrollPeriod])
+  @@map("timesheets")
+}
+
+model TimesheetDocument {
+  id            String    @id @default(uuid())
+  timesheetId   String
+  timesheet     Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  fileName      String
+  filePath      String
+  fileType      String
+  fileHash      String?
+  fileSize      Int?
+  mimeType      String?
+  ocrText       String?   @db.Text
+  ocrConfidence Decimal?  @db.Decimal(5, 2)
+  source        String    @default("upload")
+  createdAt     DateTime  @default(now())
+
+  @@index([fileHash])
+  @@map("timesheet_documents")
+}
+
+model TimesheetEntry {
+  id          String    @id @default(uuid())
+  timesheetId String
+  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  employeeId  String?
+  employee    Employee? @relation(fields: [employeeId], references: [id])
+  date        DateTime?
+  hours       Decimal?  @db.Decimal(6, 2)
+  overtime    Decimal?  @db.Decimal(6, 2)
+  description String?
+  confidence  Decimal?  @db.Decimal(5, 2)
+  createdAt   DateTime  @default(now())
+
+  @@map("timesheet_entries")
+}
+
+model InvoiceRule {
+  id        String   @id @default(uuid())
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  name      String
+  ruleType  String
+  config    Json
+  isActive  Boolean  @default(true)
+  priority  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@map("invoice_rules")
+}
+
+model ValidationRule {
+  id        String   @id @default(uuid())
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  name      String
+  ruleKey   String
+  ruleValue Json
+  severity  String   @default("error")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([ruleKey])
+  @@map("validation_rules")
+}
+
+model FraudLog {
+  id          String     @id @default(uuid())
+  timesheetId String?
+  timesheet   Timesheet? @relation(fields: [timesheetId], references: [id])
+  checkType   String
+  score       Decimal    @db.Decimal(5, 2)
+  riskLevel   String
+  reason      String
+  evidence    Json?
+  createdAt   DateTime   @default(now())
+
+  @@index([timesheetId])
+  @@map("fraud_logs")
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  invoiceNumber  String        @unique
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id])
+  timesheetId    String?
+  timesheet      Timesheet?    @relation(fields: [timesheetId], references: [id])
+  status         InvoiceStatus @default(DRAFT)
+  subtotal       Decimal       @db.Decimal(14, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(14, 2)
+  discountAmount Decimal       @default(0) @db.Decimal(14, 2)
+  grandTotal     Decimal       @db.Decimal(14, 2)
+  currency       String        @default("USD")
+  payrollPeriod  String?
+  pdfPath        String?
+  qrCode         String?
+  dueDate        DateTime?
+  paidAt         DateTime?
+  financeNotes   String?
+  approvedBy     String?
+  approvedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  items        InvoiceItem[]
+  dispatchLogs DispatchLog[]
+  timeline     InvoiceTimelineEvent[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([payrollPeriod])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Decimal @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(12, 2)
+  amount      Decimal @db.Decimal(14, 2)
+  employeeId  String?
+
+  @@map("invoice_items")
+}
+
+model InvoiceTimelineEvent {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  event       String
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@map("invoice_timeline_events")
+}
+
+model DispatchLog {
+  id          String    @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  method      String    @default("email")
+  recipient   String
+  status      String    @default("pending")
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  error       String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([invoiceId])
+  @@map("dispatch_logs")
+}
+
+model ClientQuery {
+  id          String      @id @default(uuid())
+  clientId    String
+  client      Client      @relation(fields: [clientId], references: [id])
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  invoiceId   String?
+  timesheetId String?
+  subject     String
+  message     String      @db.Text
+  status      QueryStatus @default(OPEN)
+  response    String?     @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@map("client_queries")
+}
+
+model ChatHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  role      String
+  content   String   @db.Text
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("chat_history")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model SeedMetadata {
+  id        String   @id @default("seed")
+  seededAt  DateTime @default(now())
+  source    String
+  version   String   @default("1.0")
+
+  @@map("seed_metadata")
+}

@@ -1,0 +1,1 @@
+Case 7: Clean Excel — all fields match ERP. Should auto-process at high confidence.

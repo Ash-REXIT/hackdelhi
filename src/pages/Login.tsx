@@ -31,27 +31,20 @@ export function Login() {
     console.log('Operations: manager@flowinvoice.ai / manager123');
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
-    // Simulate network delay for premium feel
-    setTimeout(() => {
-      if (email === 'admin@flowinvoice.ai' && password === 'admin123') {
-        login('admin');
-        navigate('/workspace');
-      } else if (email === 'user@client.com' && password === 'user123') {
-        login('client');
-        navigate('/portal');
-      } else if (email === 'manager@flowinvoice.ai' && password === 'manager123') {
-        login('manager');
-        navigate('/operations');
-      } else {
-        setError('Invalid email or password.');
-        setIsLoading(false);
-      }
-    }, 600);
+    try {
+      await login(email);
+      if (email === 'admin@flowinvoice.ai') navigate('/workspace');
+      else if (email === 'user@client.com') navigate('/portal');
+      else if (email === 'manager@flowinvoice.ai') navigate('/operations');
+      else navigate('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+      setIsLoading(false);
+    }
   };
 
   return (

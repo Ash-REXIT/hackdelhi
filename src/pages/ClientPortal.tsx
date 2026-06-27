@@ -1,4 +1,4 @@
-import { UploadCloud, FileText, CheckCircle, MessageSquare, Download, HelpCircle } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle, MessageSquare, Download, HelpCircle, AlertTriangle } from 'lucide-react';
 
 export function ClientPortal() {
   return (

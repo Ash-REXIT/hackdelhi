@@ -1,32 +1,46 @@
-# React + TypeScript + Vite
+# FlowInvoice AI
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Full-stack timesheet-to-invoice platform (main branch UI + PostgreSQL backend).
 
-Currently, two official plugins are available:
+## Quick start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+cd d:\hackarena
+npm install
+npm run setup:db    # first time: schema + seed ERP data
+npm run dev         # frontend :5173 + backend :3001
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Demo logins
+
+| Portal | Email | Route |
+|--------|-------|-------|
+| FinOps (admin) | `admin@flowinvoice.ai` | `/workspace` |
+| Client upload | `user@client.com` | `/portal/upload` |
+| Finance | `manager@flowinvoice.ai` | `/operations` |
+
+## Test flow
+
+1. Login as **user@client.com** → **Portal → Upload**
+2. Upload a file from `data/test-cases/` (see `data/test-cases/SAMPLES.md`)
+3. Login as **admin@flowinvoice.ai** → **FinOps Dashboard** / **Timesheet Inbox** / **Review Queue**
+
+## Sample files
+
+- `case-1/case1-email-payout.txt` — happy path (Carlos Smith)
+- `case-1/case1-ambiguous-aisha.txt` — ambiguous name review
+- `case-7/case7-complete-timesheet.xlsx` — auto-invoice candidate
+
+## Stack
+
+- **Frontend:** React 19 + Vite (root `src/`)
+- **Backend:** Express + Prisma + PostgreSQL (`backend/`)
+- **Rules:** Validation + fraud detection in `backend/src/services/`
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Frontend + backend |
+| `npm run db:reseed` | Reload Excel into PostgreSQL |
+| `npm run generate:test-cases` | Regenerate sample files |

@@ -1,0 +1,12 @@
+From: emp10002@test.com
+To: timesheets@tasc.com
+Subject: My June timesheet
+
+Hi,
+
+This is my timesheet submission for June 2026.
+Employee ID: EMP10002
+Days worked: 23
+
+Thanks,
+Ahmed Khan

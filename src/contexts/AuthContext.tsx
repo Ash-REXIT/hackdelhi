@@ -1,46 +1,86 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api, setToken } from '@/lib/api';
+import type { BackendRole, User } from '@/types/api';
 
-type Role = 'admin' | 'client' | 'manager' | null;
+export type UIRole = 'admin' | 'client' | 'manager';
 
 interface AuthContextType {
-  role: Role;
-  login: (role: Role) => void;
+  role: UIRole | null;
+  user: User | null;
+  login: (email: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRole] = useState<Role>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function backendToUiRole(role: BackendRole): UIRole {
+  if (role === 'FINOPS') return 'admin';
+  if (role === 'CLIENT') return 'client';
+  return 'manager';
+}
 
-  useEffect(() => {
-    const savedRole = localStorage.getItem('flowinvoice_role') as Role;
-    if (savedRole) {
-      setRole(savedRole);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const loadUser = useCallback(async () => {
+    const token = localStorage.getItem('flowinvoice_token');
+    if (!token) {
+      setLoading(false);
+      return;
     }
-    setIsLoading(false);
+    try {
+      const me = await api<User>('/api/auth/me');
+      setUser(me);
+    } catch {
+      setToken(null);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const login = (newRole: Role) => {
-    setRole(newRole);
-    if (newRole) {
-      localStorage.setItem('flowinvoice_role', newRole);
-    }
+  useEffect(() => {
+    loadUser();
+  }, [loadUser]);
+
+  const login = async (email: string) => {
+    const res = await api<{ token: string; user: User }>('/api/auth/dev-login', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    setToken(res.token);
+    setUser(res.user);
+    localStorage.setItem('flowinvoice_role', backendToUiRole(res.user.role));
   };
 
   const logout = () => {
-    setRole(null);
+    setToken(null);
+    setUser(null);
     localStorage.removeItem('flowinvoice_role');
   };
 
-  if (isLoading) {
-    return null; // Prevent flicker on initial load
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B0F14] flex items-center justify-center text-muted-foreground">
+        Loading FlowInvoice AI...
+      </div>
+    );
   }
 
   return (
-    <AuthContext.Provider value={{ role, login, logout, isAuthenticated: !!role }}>
+    <AuthContext.Provider
+      value={{
+        role: user ? backendToUiRole(user.role) : null,
+        user,
+        login,
+        logout,
+        isAuthenticated: !!user,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -48,8 +88,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 }

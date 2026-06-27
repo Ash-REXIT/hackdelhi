@@ -1,0 +1,16 @@
+From: hr@cl001.ae
+To: invoicing@tasc.com
+Subject: June 2026 timesheets — Emirates Steel Industries LLC
+
+Client: Emirates Steel Industries LLC (CL001)
+Period: June 2026
+
+Staff timesheet summary:
+  1. David Fernandez — 20 days
+  2. Rajesh Johnson — 21 days
+  3. Meera Al Rashid — 22 days
+  4. Rajesh Patel — 23 days
+  5. Hana Al Farsi — 24 days
+  6. Lakshmi Fernandez — 20 days
+
+Please generate invoices accordingly.

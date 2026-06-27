@@ -1,0 +1,18 @@
+From: hana.alfarsi@test.com
+To: timesheets@tasc.com
+Subject: June 2026 timesheet — EMP10004
+
+Employee ID: EMP10004
+Month: June 2026
+Working Days: 22
+Leave Taken: 2 days (Annual Leave)
+
+Reimbursements:
+  - Client visit travel: AED 450.00
+  - Mobile allowance top-up: AED 120.00
+  - Parking receipts: AED 85.50
+
+Total reimbursement: AED 655.50
+
+Regards,
+Hana Al Farsi
