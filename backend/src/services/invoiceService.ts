@@ -97,7 +97,7 @@ export async function generateInvoice(timesheetId: string) {
       invoiceNumber,
       clientId: timesheet.clientId,
       timesheetId,
-      status: 'PENDING_FINANCE_APPROVAL',
+      status: 'FINANCE_APPROVED',
       subtotal,
       taxAmount,
       discountAmount: 0,
@@ -130,6 +130,7 @@ export async function generateInvoice(timesheetId: string) {
   await addTimelineEvent(invoice.id, 'OCR_COMPLETED', 'Document processed');
   await addTimelineEvent(invoice.id, 'VALIDATED', 'Validation passed');
   await addTimelineEvent(invoice.id, 'INVOICE_GENERATED', `Invoice ${invoiceNumber} generated`);
+  await addTimelineEvent(invoice.id, 'APPROVED', 'Processing completed — ready for dispatch');
 
   return prisma.invoice.findUnique({
     where: { id: invoice.id },

@@ -5,10 +5,13 @@ import fs from 'fs';
 import { prisma } from '../lib/prisma';
 import { config } from '../lib/config';
 import { authenticate, authorize } from '../middleware/auth';
-import { processTimesheet, computeFileHash, approveTimesheetReview, rejectTimesheetReview } from '../services/workflowService';
+import { processTimesheet, computeFileHash, approveTimesheetReview, rejectTimesheetReview, generateInvoiceFromTimesheet } from '../services/workflowService';
 import { explainFlag } from '../services/aiClient';
 import { logAudit } from '../services/auditService';
 import { routeParams } from '../lib/request';
+import * as validationService from '../services/validationService';
+import * as explanationService from '../services/explanationService';
+import { isHackathonTestCase } from '../lib/testCase';
 
 const router = Router();
 
@@ -106,6 +109,8 @@ router.get('/', authenticate, async (req, res, next) => {
       where.status = { in: ['EXCEPTION', 'PENDING_REVIEW'] };
     } else if (queue === 'review') {
       where.status = { in: ['PENDING_REVIEW', 'EXCEPTION'] };
+    } else if (queue === 'client-approval') {
+      where.status = 'PENDING_CLIENT_APPROVAL';
     } else if (queue === 'completed') {
       where.status = { in: ['INVOICE_GENERATED', 'DISPATCHED', 'PAID', 'FINANCE_APPROVED'] };
     }
@@ -153,6 +158,57 @@ router.get('/:id', authenticate, async (req, res, next) => {
   }
 });
 
+router.patch('/:id/send-client-approval', authenticate, authorize('FINOPS'), async (req, res, next) => {
+  try {
+    const id = routeParams(req).id;
+    const extractedData = req.body.extractedData as import('../types').ExtractedTimesheetData | undefined;
+    const timesheet = await validationService.sendForClientApproval(id, req.tiaUser!.id, extractedData);
+    await logAudit('TIMESHEET_SENT_FOR_CLIENT_APPROVAL', 'timesheet', id, req.tiaUser!.id);
+    return res.json({ success: true, data: timesheet });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/:id/client-approve', authenticate, authorize('CLIENT'), async (req, res, next) => {
+  try {
+    const id = routeParams(req).id;
+    const timesheet = await prisma.timesheet.findUnique({ where: { id } });
+    if (!timesheet) return res.status(404).json({ success: false, error: 'Not found' });
+    if (timesheet.clientId !== req.tiaUser!.clientId) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    await validationService.clientApproveOvertimeException(id, req.tiaUser!.id);
+    const invoice = await generateInvoiceFromTimesheet(id);
+    await logAudit('CLIENT_OVERTIME_APPROVED', 'timesheet', id, req.tiaUser!.id);
+    return res.json({ success: true, data: { timesheetId: id, invoice } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/:id/client-reject', authenticate, authorize('CLIENT'), async (req, res, next) => {
+  try {
+    const id = routeParams(req).id;
+    const timesheet = await prisma.timesheet.findUnique({ where: { id } });
+    if (!timesheet) return res.status(404).json({ success: false, error: 'Not found' });
+    if (timesheet.clientId !== req.tiaUser!.clientId) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    const result = await validationService.clientRejectOvertimeException(
+      id,
+      req.tiaUser!.id,
+      req.body.reason || 'Client rejected overtime exception'
+    );
+    await logAudit('CLIENT_OVERTIME_REJECTED', 'timesheet', id, req.tiaUser!.id);
+    return res.json({ success: true, data: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.patch('/:id/review', authenticate, authorize('FINOPS'), async (req, res, next) => {
   try {
     const { action, reason, extractedData } = req.body;
@@ -177,6 +233,133 @@ router.patch('/:id/review', authenticate, authorize('FINOPS'), async (req, res, 
     }
 
     res.status(400).json({ success: false, error: 'Invalid action' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/enhance-explanation', authenticate, async (req, res, next) => {
+  try {
+    const id = routeParams(req).id;
+    const timesheet = await prisma.timesheet.findUnique({
+      where: { id },
+      include: { documents: true },
+    });
+    if (!timesheet) return res.status(404).json({ success: false, error: 'Not found' });
+
+    const extracted = (timesheet.extractedData || {}) as Record<string, unknown>;
+    const fieldConfidence = (timesheet.fieldConfidence || {}) as import('../types').FieldConfidence;
+    const fileName = timesheet.documents[0]?.fileName;
+    const threshold = isHackathonTestCase(fileName) ? 70 : config.autoInvoiceConfidenceThreshold;
+    const ambiguityReasons = extracted._ambiguityReasons as string[] | undefined;
+    const matchCandidates = extracted._matchCandidates as Array<{
+      employeeId: string;
+      name: string;
+      clientCode: string;
+      clientName?: string;
+    }> | undefined;
+
+    const reviewType = explanationService.resolveReviewType({
+      status: timesheet.status,
+      fraudRiskLevel: timesheet.fraudRiskLevel,
+      validationResults: timesheet.validationResults as import('../types').ValidationResult[] | null,
+      ambiguityReasons,
+      overallConfidence: timesheet.overallConfidence,
+      confidenceThreshold: threshold,
+    });
+
+    const explanations = await explanationService.enhanceReviewExplanations({
+      extracted: extracted as import('../types').ExtractedTimesheetData,
+      fieldConfidence,
+      overallConfidence: timesheet.overallConfidence ?? undefined,
+      confidenceThreshold: threshold,
+      failedValidation: timesheet.validationResults as import('../types').ValidationResult[] | undefined,
+      fraud: {
+        fraudScore: timesheet.fraudScore ?? 0,
+        riskLevel: (timesheet.fraudRiskLevel as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL') ?? 'LOW',
+        reasons: (timesheet.fraudReasons as import('../types').FraudDetectionResult['reasons']) ?? [],
+      },
+      ambiguityReasons,
+      matchCandidates,
+      reviewType,
+    });
+
+    const enriched = explanationService.withExplanationMetadata(
+      extracted as import('../types').ExtractedTimesheetData,
+      explanations,
+      { _ambiguityReasons: ambiguityReasons, _matchCandidates: matchCandidates }
+    );
+
+    await prisma.timesheet.update({
+      where: { id },
+      data: { extractedData: enriched as object, exceptionReason: explanations.summary },
+    });
+
+    res.json({ success: true, data: explanations });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'AI enhancement failed';
+    res.status(503).json({ success: false, error: message });
+  }
+});
+
+router.post('/:id/explain-review', authenticate, async (req, res, next) => {
+  try {
+    const id = routeParams(req).id;
+    const timesheet = await prisma.timesheet.findUnique({
+      where: { id },
+      include: { documents: true },
+    });
+    if (!timesheet) return res.status(404).json({ success: false, error: 'Not found' });
+
+    const extracted = (timesheet.extractedData || {}) as Record<string, unknown>;
+    const fieldConfidence = (timesheet.fieldConfidence || {}) as import('../types').FieldConfidence;
+    const fileName = timesheet.documents[0]?.fileName;
+    const threshold = isHackathonTestCase(fileName) ? 70 : config.autoInvoiceConfidenceThreshold;
+
+    const ambiguityReasons = extracted._ambiguityReasons as string[] | undefined;
+    const reviewType = explanationService.resolveReviewType({
+      status: timesheet.status,
+      fraudRiskLevel: timesheet.fraudRiskLevel,
+      validationResults: timesheet.validationResults as import('../types').ValidationResult[] | null,
+      ambiguityReasons,
+      overallConfidence: timesheet.overallConfidence,
+      confidenceThreshold: threshold,
+    });
+
+    const explanations = await explanationService.generateReviewExplanations({
+      extracted: extracted as import('../types').ExtractedTimesheetData,
+      fieldConfidence,
+      overallConfidence: timesheet.overallConfidence ?? undefined,
+      confidenceThreshold: threshold,
+      failedValidation: timesheet.validationResults as import('../types').ValidationResult[] | undefined,
+      fraud: {
+        fraudScore: timesheet.fraudScore ?? 0,
+        riskLevel: (timesheet.fraudRiskLevel as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL') ?? 'LOW',
+        reasons: (timesheet.fraudReasons as import('../types').FraudDetectionResult['reasons']) ?? [],
+      },
+      ambiguityReasons,
+      reviewType,
+      useAi: false,
+    });
+
+    const enriched = explanationService.withExplanationMetadata(
+      extracted as import('../types').ExtractedTimesheetData,
+      explanations,
+      {
+        _ambiguityReasons: extracted._ambiguityReasons,
+        _matchCandidates: extracted._matchCandidates,
+      }
+    );
+
+    await prisma.timesheet.update({
+      where: { id },
+      data: {
+        extractedData: enriched as object,
+        exceptionReason: explanations.summary,
+      },
+    });
+
+    res.json({ success: true, data: explanations });
   } catch (err) {
     next(err);
   }

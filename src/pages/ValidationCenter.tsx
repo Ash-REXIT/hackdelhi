@@ -53,6 +53,15 @@ export function ValidationCenter() {
                   </div>
                 ))}
 
+                {(ts.extractedData as Record<string, unknown> | undefined)?._aiReviewSummary ? (
+                  <div className="mb-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="text-xs font-medium text-primary mb-1">AI Summary</p>
+                    <p className="text-xs text-muted-foreground">
+                      {String((ts.extractedData as Record<string, unknown>)._aiReviewSummary)}
+                    </p>
+                  </div>
+                ) : null}
+
                 {fraud.map((r, i) => (
                   <div key={`f-${i}`} className="mb-3 p-3 bg-panel rounded-lg border-l-2 border-l-warning">
                     <div className="text-sm font-medium flex items-center gap-2">

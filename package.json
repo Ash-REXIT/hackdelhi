@@ -9,7 +9,8 @@
     "shared"
   ],
   "scripts": {
-    "dev": "concurrently -n web,api -c blue,green \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev": "concurrently -n web,api,ai -c blue,green,magenta \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:ai\"",
+    "dev:ai": "cd ai-service && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
     "dev:frontend": "vite",
     "dev:backend": "npm run dev -w backend",
     "build": "npm run build -w shared && npm run build -w backend && tsc -b && vite build",
@@ -22,7 +23,15 @@
     "generate:test-cases": "npm run generate:test-cases -w backend",
     "db:studio": "npm run db:studio -w backend",
     "env:sync": "npx tsx scripts/sync-env.ts",
-    "setup:db": "npm run env:sync && npm run db:push && npm run db:seed"
+    "setup:db": "npm run env:sync && npm run db:push && npm run db:seed",
+    "setup:ai": "pip install -r ai-service/requirements-minimal.txt",
+    "start": "docker compose up --build",
+    "docker:start": "powershell -ExecutionPolicy Bypass -File scripts/docker-start.ps1",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:reset": "docker compose down -v && docker compose up --build -d",
+    "docker:db": "docker compose -f docker-compose.db.yml up -d"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

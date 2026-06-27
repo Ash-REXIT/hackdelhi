@@ -244,19 +244,24 @@ async function seedPayroll(sheet: XLSX.WorkSheet): Promise<void> {
 
 async function seedDefaultRules(): Promise<void> {
   const existing = await prisma.validationRule.count();
-  if (existing > 0) {
-    console.log('✓ Validation rules already exist, skipping defaults');
-    return;
-  }
 
   const defaults = [
     { name: 'Maximum Working Days', ruleKey: 'max_working_days', ruleValue: { value: 26 }, severity: 'error' },
-    { name: 'Maximum Overtime Hours', ruleKey: 'max_overtime_hours', ruleValue: { value: 80 }, severity: 'warning' },
+    { name: 'Maximum Overtime Hours', ruleKey: 'max_overtime_hours', ruleValue: { value: 20 }, severity: 'error' },
     { name: 'Required Fields', ruleKey: 'required_fields', ruleValue: { fields: ['employeeId', 'workingDays', 'payrollPeriod'] }, severity: 'error' },
     { name: 'Default Currency', ruleKey: 'currency', ruleValue: { value: 'AED' }, severity: 'error' },
     { name: 'Duplicate Timesheet Check', ruleKey: 'duplicate_timesheet', ruleValue: { enabled: true }, severity: 'error' },
     { name: 'Duplicate Invoice Check', ruleKey: 'duplicate_invoice', ruleValue: { enabled: true }, severity: 'error' },
   ];
+
+  if (existing > 0) {
+    await prisma.validationRule.updateMany({
+      where: { ruleKey: 'max_overtime_hours' },
+      data: { ruleValue: { value: 20 }, severity: 'error', name: 'Maximum Overtime Hours' },
+    });
+    console.log('✓ Updated overtime validation rule (max 20h, client approval flow)');
+    return;
+  }
 
   for (const rule of defaults) {
     await prisma.validationRule.create({ data: rule });

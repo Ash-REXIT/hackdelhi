@@ -44,6 +44,39 @@ export interface Timesheet {
   client?: { id: string; name: string; clientCode: string };
   employee?: { id: string; name: string; employeeId: string };
   documents?: TimesheetDocument[];
+  invoices?: Array<{ id: string; invoiceNumber: string; status: string }>;
+}
+
+export interface InvoiceTimelineEvent {
+  id: string;
+  event: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  status: string;
+  subtotal: number | string;
+  taxAmount?: number | string;
+  grandTotal: number | string;
+  currency: string;
+  payrollPeriod?: string;
+  pdfPath?: string;
+  dueDate?: string;
+  paidAt?: string;
+  createdAt: string;
+  client?: { id: string; name: string; clientCode: string; email?: string };
+  timesheet?: {
+    id: string;
+    status: string;
+    documents?: Array<{ fileName: string }>;
+    employee?: { name: string; employeeId: string };
+  };
+  items?: Array<{ description: string; quantity: number; unitPrice: number; amount: number }>;
+  timeline?: InvoiceTimelineEvent[];
+  dispatchLogs?: Array<{ id: string; method: string; status: string; sentAt?: string; deliveredAt?: string }>;
 }
 
 export interface DashboardData {

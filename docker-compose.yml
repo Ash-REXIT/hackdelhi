@@ -1,3 +1,9 @@
+# FlowInvoice AI — full stack (one command after git clone)
+#
+#   npm run start
+#
+# Includes: PostgreSQL, backend, AI service, Ollama + model pull, frontend
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -15,12 +21,57 @@ services:
       test: ["CMD-SHELL", "pg_isready -U tia -d tia_db"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tia-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+    volumes:
+      - ollama_data:/root/.ollama
+      - ./docker/ollama-entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: docker/ai-service.Dockerfile
+    container_name: tia-ai-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://tia:tia_secret@postgres:5432/tia_db
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      OLLAMA_ENABLED: "true"
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/backend.Dockerfile
     container_name: tia-backend
     restart: unless-stopped
     ports:
@@ -29,44 +80,43 @@ services:
       DATABASE_URL: postgresql://tia:tia_secret@postgres:5432/tia_db?schema=public
       PORT: 3001
       NODE_ENV: production
-      AI_SERVICE_URL: http://ai-service:8000
+      JWT_SECRET: ${JWT_SECRET:-dev-docker-secret-change-me}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-docker-session-secret}
       FRONTEND_URL: http://localhost:5173
-      UPLOAD_DIR: /app/uploads
+      UPLOAD_DIR: /app/backend/uploads
+      GENERATED_DIR: /app/backend/generated
+      AI_SERVICE_URL: http://ai-service:8000
+      SEED_EXCEL_PATH: /app/data/TASC_Sample_Database_vF_payroll.xlsx
+      AUTO_INVOICE_CONFIDENCE_THRESHOLD: ${AUTO_INVOICE_CONFIDENCE_THRESHOLD:-95}
     volumes:
-      - uploads_data:/app/uploads
-      - generated_data:/app/generated
+      - uploads_data:/app/backend/uploads
+      - generated_data:/app/backend/generated
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3001/api/health | grep -q healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
     depends_on:
       postgres:
         condition: service_healthy
       ai-service:
-        condition: service_started
-
-  ai-service:
-    build:
-      context: ./ai-service
-      dockerfile: Dockerfile
-    container_name: tia-ai-service
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    environment:
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-      DATABASE_URL: postgresql://tia:tia_secret@postgres:5432/tia_db?schema=public
+        condition: service_healthy
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: http://localhost:3001
+      context: .
+      dockerfile: docker/frontend.Dockerfile
     container_name: tia-frontend
     restart: unless-stopped
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:
   uploads_data:
   generated_data:
+  ollama_data:

@@ -1,0 +1,16 @@
+From: accounts@emiratessteelindustriesllc.com
+To: billing@tasc.com
+Subject: Payout Request — June 2026
+
+Dear TASC Finance,
+
+Please process the June 2026 payout for:
+
+Employee Name: Carlos Smith
+Client: Emirates Steel Industries LLC
+Period: June 2026
+Working Days: 22
+Total Amount: AED 9834.13
+
+Regards,
+Emirates Steel Industries LLC Accounts

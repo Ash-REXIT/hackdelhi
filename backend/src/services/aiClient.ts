@@ -88,6 +88,40 @@ export async function detectFraud(
   });
 }
 
+export async function enhanceReview(
+  payload: Record<string, unknown>,
+  signal?: AbortSignal
+): Promise<{
+  summary: string;
+  validationExplanation: string;
+  fraudExplanation: string;
+  confidenceExplanation: string;
+  enhanced?: boolean;
+  provider?: string;
+}> {
+  return aiFetch('/api/enhance-review', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal,
+  });
+}
+
+export async function explainReview(
+  payload: Record<string, unknown>,
+  signal?: AbortSignal
+): Promise<{
+  summary: string;
+  validationExplanation: string;
+  fraudExplanation: string;
+  confidenceExplanation: string;
+}> {
+  return aiFetch('/api/explain-review', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    signal,
+  });
+}
+
 export async function explainFlag(
   ruleKey: string,
   context: Record<string, unknown>

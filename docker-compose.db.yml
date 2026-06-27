@@ -1,0 +1,27 @@
+# PostgreSQL only — use with local npm run dev
+#
+#   docker compose -f docker-compose.db.yml up -d
+#   cp .env.example .env   # DATABASE_URL=...@localhost:5432/...
+#   npm install && npm run setup:db && npm run dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tia-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tia
+      POSTGRES_PASSWORD: tia_secret
+      POSTGRES_DB: tia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tia -d tia_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

@@ -11,24 +11,48 @@ const router = Router();
 
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const { status, clientId } = req.query;
+    const { status, clientId, queue } = req.query;
     const where: Record<string, unknown> = {};
 
     if (req.tiaUser!.role === 'CLIENT' && req.tiaUser!.clientId) {
       where.clientId = req.tiaUser!.clientId;
+      if (!status && !queue) {
+        where.status = { in: ['DISPATCHED', 'DELIVERED', 'PAID', 'CLIENT_APPROVED'] };
+      }
     } else if (clientId) {
       where.clientId = clientId;
     }
 
     if (status) where.status = status;
 
+    if (queue === 'ready') {
+      where.status = { in: ['PENDING_FINANCE_APPROVAL', 'FINANCE_APPROVED'] };
+      // Normalize legacy invoices stuck in PENDING_FINANCE_APPROVAL
+      await prisma.invoice.updateMany({
+        where: { status: 'PENDING_FINANCE_APPROVAL' },
+        data: { status: 'FINANCE_APPROVED' },
+      });
+    } else if (queue === 'dispatched') {
+      where.status = { in: ['DISPATCHED', 'DELIVERED', 'PAID'] };
+    } else if (queue === 'portal') {
+      where.status = { in: ['DISPATCHED', 'DELIVERED'] };
+    }
+
     const invoices = await prisma.invoice.findMany({
       where,
       include: {
-        client: { select: { id: true, name: true, clientCode: true } },
+        client: { select: { id: true, name: true, clientCode: true, email: true } },
+        timesheet: {
+          select: {
+            id: true,
+            status: true,
+            documents: { select: { fileName: true } },
+            employee: { select: { name: true, employeeId: true } },
+          },
+        },
         items: true,
-        timeline: { orderBy: { createdAt: 'asc' }, take: 10 },
-        dispatchLogs: { orderBy: { createdAt: 'desc' }, take: 1 },
+        timeline: { orderBy: { createdAt: 'asc' }, take: 15 },
+        dispatchLogs: { orderBy: { createdAt: 'desc' }, take: 3 },
       },
       orderBy: { createdAt: 'desc' },
       take: 100,
@@ -67,7 +91,11 @@ router.get('/:id', authenticate, async (req, res, next) => {
 router.get('/:id/pdf', authenticate, async (req, res, next) => {
   try {
     const invoice = await prisma.invoice.findUnique({ where: { id: routeParams(req).id } });
-    if (!invoice?.pdfPath) return res.status(404).json({ success: false, error: 'PDF not found' });
+    if (!invoice) return res.status(404).json({ success: false, error: 'Not found' });
+    if (req.tiaUser!.role === 'CLIENT' && invoice.clientId !== req.tiaUser!.clientId) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+    if (!invoice.pdfPath) return res.status(404).json({ success: false, error: 'PDF not found' });
     res.sendFile(path.resolve(invoice.pdfPath));
   } catch (err) {
     next(err);

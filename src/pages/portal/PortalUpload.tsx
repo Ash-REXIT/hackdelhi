@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { UploadCloud, FileText, CheckCircle2, RotateCcw } from 'lucide-react';
+import { UploadCloud, FileText, CheckCircle2, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { api } from '@/lib/api';
 import type { Timesheet } from '@/types/api';
 import { PIPELINE_STAGES, pipelineStageStatus } from '@/lib/status';
@@ -22,7 +23,7 @@ export function PortalUpload() {
   const pollTimesheet = async (id: string) => {
     const ts = await api<Timesheet>(`/api/timesheets/${id}`);
     setTimesheet(ts);
-    const done = ['INVOICE_GENERATED', 'APPROVED', 'PENDING_REVIEW', 'EXCEPTION', 'REJECTED', 'DISPATCHED'].includes(ts.status);
+    const done = ['INVOICE_GENERATED', 'APPROVED', 'PENDING_REVIEW', 'PENDING_CLIENT_APPROVAL', 'EXCEPTION', 'REJECTED', 'DISPATCHED'].includes(ts.status);
     if (!done) setTimeout(() => pollTimesheet(id), 1500);
   };
 
@@ -67,7 +68,7 @@ export function PortalUpload() {
     status: timesheet ? pipelineStageStatus(timesheet.status, i) : 'pending',
   }));
 
-  const processingDone = timesheet && ['INVOICE_GENERATED', 'APPROVED', 'PENDING_REVIEW', 'EXCEPTION', 'REJECTED', 'DISPATCHED'].includes(timesheet.status);
+  const processingDone = timesheet && ['INVOICE_GENERATED', 'APPROVED', 'PENDING_REVIEW', 'PENDING_CLIENT_APPROVAL', 'EXCEPTION', 'REJECTED', 'DISPATCHED'].includes(timesheet.status);
 
   return (
     <div className="p-12 w-full max-w-4xl mx-auto h-full overflow-y-auto">
@@ -154,7 +155,33 @@ export function PortalUpload() {
             ))}
           </div>
 
-          {timesheet?.exceptionReason && (
+          {timesheet?.status === 'PENDING_CLIENT_APPROVAL' && (
+            <div className="mt-6 p-4 rounded-xl border border-[#F59E0B]/40 bg-[#F59E0B]/10">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={18} className="text-[#F59E0B] mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-1">Overtime requires your approval</p>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    {timesheet.exceptionReason || 'This timesheet exceeded the overtime policy and was sent to your Approval Center.'}
+                  </p>
+                  <Link
+                    to="/portal/approvals"
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    Go to Approval Center →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {timesheet?.status === 'INVOICE_GENERATED' && (
+            <p className="mt-6 text-sm text-success">
+              Invoice generated successfully — visible in FinOps dashboard.
+            </p>
+          )}
+
+          {timesheet?.exceptionReason && timesheet.status !== 'PENDING_CLIENT_APPROVAL' && (
             <p className="mt-6 text-sm text-warning">{timesheet.exceptionReason}</p>
           )}
         </div>

@@ -34,6 +34,55 @@ export async function localOcr(filePath: string, fileType: string): Promise<OcrR
   return { text: await fs.readFile(filePath, 'utf8').catch(() => ''), confidence: 50 };
 }
 
+export function parseOvertimeFromText(ocrText: string): number {
+  const patterns = [
+    /(?:overtime|ot)\s*(?:hours?)?\s*[:\-]\s*(\d+\.?\d*)/i,
+    /(?:overtime|ot)\s*(?:hours?)?\s+(\d+\.?\d*)/i,
+    /(\d+\.?\d*)\s*(?:hours?\s*)?(?:of\s+)?(?:overtime|ot)\b/i,
+  ];
+  for (const pattern of patterns) {
+    const m = ocrText.match(pattern);
+    if (m) return parseFloat(m[1]);
+  }
+  return 0;
+}
+
+export function mergeExtractionWithOcr(
+  ocrText: string,
+  extracted: ExtractedTimesheetData,
+  fieldConfidence: FieldConfidence
+): { data: ExtractedTimesheetData; confidence: FieldConfidence } {
+  const heuristic = localExtract(ocrText);
+  const data = { ...extracted };
+  const confidence = { ...fieldConfidence };
+
+  const ocrOvertime = parseOvertimeFromText(ocrText);
+  if (ocrOvertime > 0 && (!data.overtime || data.overtime === 0)) {
+    data.overtime = ocrOvertime;
+    confidence.overtime = Math.max(confidence.overtime ?? 0, heuristic.confidence.overtime ?? 88);
+  }
+
+  const numericFields: Array<keyof ExtractedTimesheetData> = ['workingDays', 'overtime', 'reimbursements'];
+  for (const field of numericFields) {
+    const hv = heuristic.data[field] as number;
+    if (hv && (!data[field] || data[field] === 0)) {
+      (data as Record<string, unknown>)[field] = hv;
+      confidence[field] = Math.max(confidence[field] ?? 0, heuristic.confidence[field] ?? 85);
+    }
+  }
+
+  const stringFields: Array<keyof ExtractedTimesheetData> = ['employeeId', 'employeeName', 'clientCode', 'payrollPeriod'];
+  for (const field of stringFields) {
+    const hv = heuristic.data[field] as string;
+    if (hv && !data[field]) {
+      (data as Record<string, unknown>)[field] = hv;
+      confidence[field] = Math.max(confidence[field] ?? 0, heuristic.confidence[field] ?? 80);
+    }
+  }
+
+  return { data, confidence };
+}
+
 export function localExtract(ocrText: string): { data: ExtractedTimesheetData; confidence: FieldConfidence } {
   const data: ExtractedTimesheetData = {
     employeeId: '',
@@ -86,10 +135,10 @@ export function localExtract(ocrText: string): { data: ExtractedTimesheetData; c
     }
   }
 
-  const ot = ocrText.match(/(?:overtime|ot)[:\s]+(\d+\.?\d*)/i);
-  if (ot) {
-    data.overtime = parseFloat(ot[1]);
-    confidence.overtime = 85;
+  const otVal = parseOvertimeFromText(ocrText);
+  if (otVal > 0) {
+    data.overtime = otVal;
+    confidence.overtime = 88;
   }
 
   const reimb = [...ocrText.matchAll(/AED\s*([\d,.]+)/gi)];
@@ -278,6 +327,23 @@ export async function localValidate(
       severity: 'error',
       message: 'No employee identifier extracted',
       suggestedFix: 'Provide employee name or ID',
+    });
+    passed = false;
+  }
+
+  const rules = await prisma.validationRule.findMany({
+    where: { isActive: true, OR: [{ clientId: null }, { clientId }] },
+  });
+  const otRule = rules.find((r) => r.ruleKey === 'max_overtime_hours');
+  const otMax = (otRule?.ruleValue as { value?: number } | null)?.value ?? 20;
+  if ((extracted.overtime || 0) > otMax) {
+    results.push({
+      passed: false,
+      ruleKey: 'max_overtime_hours',
+      ruleName: 'Maximum Overtime',
+      severity: 'error',
+      message: `Overtime ${extracted.overtime}h exceeds maximum ${otMax}h — requires client approval`,
+      suggestedFix: 'Client must approve overtime exception',
     });
     passed = false;
   }

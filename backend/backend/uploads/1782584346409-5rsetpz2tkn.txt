@@ -1,0 +1,15 @@
+From: ahmed.khan@emiratessteel.ae
+To: billing@tasc.com
+Subject: June 2026 timesheet — overtime included
+
+Employee ID: EMP10002
+Employee Name: Ahmed Khan
+Client Code: CL001
+Working days: 22
+Overtime hours: 28
+Payroll Period: June 2026
+
+Please process payout including approved overtime.
+
+Thanks,
+Ahmed Khan

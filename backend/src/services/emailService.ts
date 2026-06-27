@@ -17,28 +17,30 @@ export async function dispatchInvoice(invoiceId: string) {
   });
 
   if (!invoice) throw new Error('Invoice not found');
-  if (!invoice.client.email) throw new Error('Client has no email configured');
+
+  const recipient = invoice.client.email || 'user@client.com';
 
   const dispatchLog = await prisma.dispatchLog.create({
     data: {
       invoiceId,
-      method: 'email',
-      recipient: invoice.client.email,
+      method: 'portal',
+      recipient,
       status: 'pending',
     },
   });
 
   try {
-    if (config.smtp.user) {
+    if (config.smtp.user && invoice.client.email) {
       await transporter.sendMail({
         from: config.smtp.from,
         to: invoice.client.email,
-        subject: `Invoice ${invoice.invoiceNumber} from TASC`,
+        subject: `Invoice ${invoice.invoiceNumber} from FlowInvoice AI`,
         html: `
           <h2>Invoice ${invoice.invoiceNumber}</h2>
           <p>Dear ${invoice.client.name},</p>
           <p>Please find your invoice attached. Total: <strong>${invoice.currency} ${Number(invoice.grandTotal).toFixed(2)}</strong></p>
           <p>Due date: ${invoice.dueDate?.toLocaleDateString() || 'N/A'}</p>
+          <p>View in your client portal under My Invoices.</p>
           <p>Regards,<br/>FlowInvoice AI</p>
         `,
         attachments: invoice.pdfPath
@@ -46,12 +48,13 @@ export async function dispatchInvoice(invoiceId: string) {
           : [],
       });
     } else {
-      console.log(`[Email Mock] Invoice ${invoice.invoiceNumber} -> ${invoice.client.email}`);
+      console.log(`[Dispatch] Invoice ${invoice.invoiceNumber} -> client portal (${invoice.client.name})`);
     }
 
+    const now = new Date();
     await prisma.dispatchLog.update({
       where: { id: dispatchLog.id },
-      data: { status: 'sent', sentAt: new Date() },
+      data: { status: 'sent', sentAt: now, deliveredAt: now },
     });
 
     await prisma.invoice.update({
@@ -66,8 +69,8 @@ export async function dispatchInvoice(invoiceId: string) {
       });
     }
 
-    await addTimelineEvent(invoiceId, 'DISPATCHED', `Sent to ${invoice.client.email}`);
-    await addTimelineEvent(invoiceId, 'DELIVERED', 'Invoice delivered to client');
+    await addTimelineEvent(invoiceId, 'DISPATCHED', `Dispatched to ${invoice.client.name} client portal`);
+    await addTimelineEvent(invoiceId, 'DELIVERED', 'Available in client dashboard — My Invoices');
 
     return dispatchLog;
   } catch (error) {
