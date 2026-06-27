@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { ValidationBadge } from '../../components/ui/StatusBadge'
-import { getVerificationReport, verificationReports } from '../../data/mockData'
+import { useData, getVerificationReport as findReport } from '../../context/DataContext'
 import { cn } from '../../lib/utils'
 
 const validationIcons = {
@@ -20,7 +20,8 @@ const validationIcons = {
 export function VerificationReportPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const report = getVerificationReport(id ?? '') ?? verificationReports[0]
+  const { verificationReports } = useData()
+  const report = findReport(id ?? '', verificationReports) ?? verificationReports[0]
 
   const scoreCards = [
     { label: 'OCR Accuracy', value: `${report.ocrAccuracy}%`, icon: Scan, color: 'text-blue-600' },
@@ -125,6 +126,7 @@ export function VerificationReportPage() {
 
 export function VerificationReportsList() {
   const navigate = useNavigate()
+  const { verificationReports } = useData()
 
   return (
     <>

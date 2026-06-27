@@ -1,16 +1,17 @@
 import { User, Mail, Building2, Globe, Shield } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { AIChat } from '../../components/ui/AIChat'
-import { CURRENT_CLIENT } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 
 export function ClientProfile() {
+  const { currentClient } = useData()
   const fields = [
-    { icon: User, label: 'Contact Person', value: CURRENT_CLIENT.contactPerson },
-    { icon: Mail, label: 'Email', value: CURRENT_CLIENT.email },
-    { icon: Building2, label: 'Billing Entity', value: CURRENT_CLIENT.billingEntity },
-    { icon: Globe, label: 'Currency', value: CURRENT_CLIENT.currency },
-    { icon: Shield, label: 'Validation Profile', value: CURRENT_CLIENT.validationProfile },
+    { icon: User, label: 'Contact Person', value: currentClient.contactPerson },
+    { icon: Mail, label: 'Email', value: currentClient.email },
+    { icon: Building2, label: 'Billing Entity', value: currentClient.billingEntity },
+    { icon: Globe, label: 'Currency', value: currentClient.currency },
+    { icon: Shield, label: 'Validation Profile', value: currentClient.validationProfile },
   ]
 
   return (
@@ -21,13 +22,13 @@ export function ClientProfile() {
           <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200/60 dark:bg-slate-900 dark:ring-slate-800">
             <div className="mb-8 flex items-center gap-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-accent text-2xl font-bold text-white">
-                {CURRENT_CLIENT.companyName.charAt(0)}
+                {currentClient.companyName.charAt(0)}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{CURRENT_CLIENT.companyName}</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{currentClient.companyName}</h2>
                 <div className="mt-1 flex items-center gap-2">
                   <StatusBadge status="approved" label="Active Client" />
-                  <span className="text-sm text-slate-500">{CURRENT_CLIENT.dispatchRule}</span>
+                  <span className="text-sm text-slate-500">{currentClient.dispatchRule}</span>
                 </div>
               </div>
             </div>
@@ -46,7 +47,7 @@ export function ClientProfile() {
 
             <div className="mt-8 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 p-5 dark:from-blue-950/30 dark:to-indigo-950/30">
               <p className="text-sm font-semibold text-slate-900 dark:text-white">Billing Rate</p>
-              <p className="mt-1 text-2xl font-bold gradient-text">₹{CURRENT_CLIENT.billingRate.toLocaleString('en-IN')} / hour</p>
+              <p className="mt-1 text-2xl font-bold gradient-text">₹{currentClient.billingRate.toLocaleString('en-IN')} / hour</p>
             </div>
           </div>
         </div>

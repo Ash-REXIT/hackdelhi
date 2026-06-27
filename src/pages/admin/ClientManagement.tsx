@@ -2,11 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { clients } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import type { Client } from '../../types'
 
 export function ClientManagement() {
   const navigate = useNavigate()
+  const { clients } = useData()
 
   const columns: Column<Client>[] = [
     { key: 'companyName', header: 'Company Name', sortable: true },

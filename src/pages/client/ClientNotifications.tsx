@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { FileText, Receipt, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
-import { clientNotifications } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime, cn } from '../../lib/utils'
 
 const typeIcons = {
@@ -14,6 +14,7 @@ const typeIcons = {
 
 export function ClientNotifications() {
   const navigate = useNavigate()
+  const { clientNotifications } = useData()
 
   return (
     <>

@@ -5,25 +5,45 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "server": "tsx server/index.ts",
+    "excel:template": "tsx server/scripts/generate-template.ts",
+    "import:excel": "tsx server/scripts/import-file.ts",
+    "import:tasc": "tsx server/scripts/import-tasc-database.ts",
+    "db:install-mysql": "powershell -ExecutionPolicy Bypass -File scripts/install-mysql.ps1",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.3",
     "tailwindcss": "^4.3.1",
+    "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "vite": "^8.1.0"
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "express": "^5.2.1",
     "framer-motion": "^12.42.0",
     "lucide-react": "^1.21.0",
+    "multer": "^2.2.0",
+    "mysql2": "^3.22.5",
+    "pg": "^8.22.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
-    "recharts": "^3.9.0"
+    "recharts": "^3.9.0",
+    "xlsx": "^0.18.5"
   }
 }

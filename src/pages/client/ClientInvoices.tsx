@@ -2,18 +2,19 @@ import { motion } from 'framer-motion'
 import { Download, Receipt } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { getClientInvoices, CURRENT_CLIENT } from '../../data/mockData'
+import { useData, getClientInvoices } from '../../context/DataContext'
 import { formatCurrency, formatDate } from '../../lib/utils'
 
 export function ClientInvoices() {
-  const invoices = getClientInvoices(CURRENT_CLIENT.id)
+  const { currentClient, invoices } = useData()
+  const clientInvoices = getClientInvoices(currentClient.id, invoices)
 
   return (
     <>
       <Header title="Invoices" subtitle="View and download your generated invoices" />
       <div className="p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {invoices.map((inv, i) => (
+          {clientInvoices.map((inv, i) => (
             <motion.div
               key={inv.id}
               initial={{ opacity: 0, y: 16 }}
@@ -29,7 +30,7 @@ export function ClientInvoices() {
               </div>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{inv.invoiceNumber}</p>
               <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
-                {formatCurrency(inv.grandTotal, CURRENT_CLIENT.currency)}
+                {formatCurrency(inv.grandTotal, currentClient.currency)}
               </p>
               <div className="mt-4 space-y-1.5 text-sm text-slate-500">
                 <p>Period: {inv.billingPeriod}</p>

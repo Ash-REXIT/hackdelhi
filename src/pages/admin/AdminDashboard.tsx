@@ -4,10 +4,12 @@ import {
 import { Header } from '../../components/layout/Header'
 import { KPICard } from '../../components/ui/KPICard'
 import { ActivityTimeline } from '../../components/ui/Timeline'
-import { adminKPIs, adminActivities, adminNotifications } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
+import { adminKPIs, adminActivities } from '../../data/mockData'
 import { formatDateTime } from '../../lib/utils'
 
 export function AdminDashboard() {
+  const { adminNotifications } = useData()
   const unread = adminNotifications.filter((n) => !n.read).length
 
   return (

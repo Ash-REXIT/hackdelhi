@@ -2,10 +2,12 @@ import { FileText, Receipt, Clock, RotateCcw } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { KPICard } from '../../components/ui/KPICard'
 import { ActivityTimeline } from '../../components/ui/Timeline'
-import { clientKPIs, clientActivities, CURRENT_CLIENT, clientNotifications } from '../../data/mockData'
+import { clientKPIs, clientActivities } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime } from '../../lib/utils'
 
 export function ClientDashboard() {
+  const { currentClient, clientNotifications } = useData()
   const unread = clientNotifications.filter((n) => !n.read).length
 
   return (
@@ -16,7 +18,7 @@ export function ClientDashboard() {
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
             Welcome Back,
           </h2>
-          <p className="mt-1 text-xl font-semibold gradient-text">{CURRENT_CLIENT.companyName}</p>
+          <p className="mt-1 text-xl font-semibold gradient-text">{currentClient.companyName}</p>
           <p className="mt-1 text-sm text-slate-500">Track your timesheets, verifications, and invoices in one place.</p>
         </div>
 

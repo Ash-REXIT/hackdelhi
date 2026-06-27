@@ -2,11 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Users, ShieldAlert, Brain, ChevronRight } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
-import { timesheets, getVerificationReport } from '../../data/mockData'
+import { useData, getVerificationReport as findReport } from '../../context/DataContext'
 import { cn } from '../../lib/utils'
 
 export function AIReviewQueue() {
   const navigate = useNavigate()
+  const { timesheets, verificationReports } = useData()
   const queue = timesheets.filter((t) => ['pending', 'critical', 'returned'].includes(t.status))
 
   return (
@@ -15,7 +16,7 @@ export function AIReviewQueue() {
       <div className="p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {queue.map((ts, i) => {
-            const report = getVerificationReport(ts.id)
+            const report = findReport(ts.id, verificationReports)
             return (
               <motion.button
                 key={ts.id}

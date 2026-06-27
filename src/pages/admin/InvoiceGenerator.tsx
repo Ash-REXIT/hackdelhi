@@ -2,13 +2,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Download, FileSpreadsheet, Send, Receipt, ArrowLeft } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
-import { getTimesheet, invoices, clients } from '../../data/mockData'
+import { useData, getTimesheet as findTimesheet } from '../../context/DataContext'
 import { formatCurrency } from '../../lib/utils'
 
 export function InvoiceGenerator() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const timesheet = getTimesheet(id ?? '') ?? getTimesheet('TS-2024-0891')
+  const { timesheets, invoices, clients } = useData()
+  const timesheet = findTimesheet(id ?? '', timesheets) ?? findTimesheet('TS-2024-0891', timesheets)
   const invoice = invoices.find((i) => i.timesheetId === timesheet?.id) ?? invoices[0]
   const client = clients.find((c) => c.id === timesheet?.clientId) ?? clients[0]
 

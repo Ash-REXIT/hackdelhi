@@ -7,7 +7,8 @@ import {
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { exceptions, timesheets } from '../../data/mockData'
+import { exceptions } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime, cn } from '../../lib/utils'
 import type { Timesheet } from '../../types'
 
@@ -24,6 +25,7 @@ const exceptionIcons: Record<string, typeof Copy> = {
 
 export function ExceptionCenter() {
   const navigate = useNavigate()
+  const { timesheets } = useData()
   const [filter, setFilter] = useState<string | null>(null)
 
   const filteredTimesheets = filter

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { FileText, Receipt, AlertTriangle, Upload } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { AIChat } from '../../components/ui/AIChat'
-import { adminNotifications } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime, cn } from '../../lib/utils'
 
 const typeIcons = {
@@ -15,6 +15,7 @@ const typeIcons = {
 
 export function AdminNotifications() {
   const navigate = useNavigate()
+  const { adminNotifications } = useData()
 
   return (
     <>

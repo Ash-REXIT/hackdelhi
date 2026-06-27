@@ -1,10 +1,11 @@
 import { Download } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { ActivityTimeline } from '../../components/ui/Timeline'
-import { auditLogs } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime } from '../../lib/utils'
 
 export function AuditLogs() {
+  const { auditLogs } = useData()
   return (
     <>
       <Header title="Audit Logs" subtitle="Complete audit trail of system and user actions" />

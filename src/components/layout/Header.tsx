@@ -1,6 +1,7 @@
 import { Search, Moon, Sun, Bell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
+import { DbStatusBadge } from '../ui/DbStatus'
 import { cn } from '../../lib/utils'
 
 interface HeaderProps {
@@ -27,6 +28,7 @@ export function Header({ title, subtitle, notificationPath, unreadCount = 0 }: H
       </div>
 
       <div className="flex items-center gap-3">
+        <DbStatusBadge />
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input

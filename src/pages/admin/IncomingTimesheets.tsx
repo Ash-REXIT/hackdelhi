@@ -2,12 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { timesheets } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatDateTime } from '../../lib/utils'
 import type { Timesheet } from '../../types'
 
 export function IncomingTimesheets() {
   const navigate = useNavigate()
+  const { timesheets } = useData()
 
   const columns: Column<Timesheet>[] = [
     { key: 'id', header: 'Timesheet ID', sortable: true },

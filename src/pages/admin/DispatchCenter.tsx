@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { CheckCircle2, Circle, Clock, Send, Mail, Eye, ThumbsUp } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { invoices } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatCurrency, formatDate } from '../../lib/utils'
 
 const dispatchSteps = [
@@ -23,6 +23,7 @@ function getStepIndex(status: string) {
 
 export function DispatchCenter() {
   const navigate = useNavigate()
+  const { invoices } = useData()
 
   return (
     <>

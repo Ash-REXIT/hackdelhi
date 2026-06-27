@@ -2,12 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { invoices } from '../../data/mockData'
+import { useData } from '../../context/DataContext'
 import { formatCurrency, formatDate } from '../../lib/utils'
 import type { Invoice } from '../../types'
 
 export function InvoiceValidation() {
   const navigate = useNavigate()
+  const { invoices } = useData()
 
   const columns: Column<Invoice>[] = [
     { key: 'invoiceNumber', header: 'Invoice #', sortable: true },

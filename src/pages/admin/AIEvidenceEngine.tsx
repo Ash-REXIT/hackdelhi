@@ -8,7 +8,7 @@ import {
 import { Header } from '../../components/layout/Header'
 import { ValidationBadge } from '../../components/ui/StatusBadge'
 import { EvidenceTimeline } from '../../components/ui/Timeline'
-import { getVerificationReport, getTimesheet, verificationReports } from '../../data/mockData'
+import { useData, getVerificationReport as findReport, getTimesheet as findTimesheet } from '../../context/DataContext'
 import { cn } from '../../lib/utils'
 
 const evidenceSections = [
@@ -27,8 +27,9 @@ const evidenceSections = [
 export function AIEvidenceEngine() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const timesheet = getTimesheet(id ?? '') ?? getTimesheet('TS-2024-0893')
-  const report = getVerificationReport(id ?? '') ?? verificationReports[1]
+  const { timesheets, verificationReports } = useData()
+  const timesheet = findTimesheet(id ?? '', timesheets) ?? findTimesheet('TS-2024-0893', timesheets)
+  const report = findReport(id ?? '', verificationReports) ?? verificationReports[1]
 
   const staticResults: Record<string, { status: 'pass' | 'warn' | 'fail'; detail: string }> = {
     signature: report.missingFields.status === 'pass'

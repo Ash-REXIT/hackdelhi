@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
-import { getClientTimesheets, CURRENT_CLIENT } from '../../data/mockData'
+import { useData, getClientTimesheets } from '../../context/DataContext'
 import { formatDateTime } from '../../lib/utils'
 import type { Timesheet } from '../../types'
 
 export function MyTimesheets() {
   const navigate = useNavigate()
-  const data = getClientTimesheets(CURRENT_CLIENT.id)
+  const { currentClient, timesheets } = useData()
+  const data = getClientTimesheets(currentClient.id, timesheets)
 
   const columns: Column<Timesheet>[] = [
     { key: 'id', header: 'Timesheet ID', sortable: true },
