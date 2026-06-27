@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { ValidationBadge } from '../../components/ui/StatusBadge'
+import { AnomalyPanel } from '../../components/ui/AnomalyPanel'
 import { useData, getVerificationReport as findReport } from '../../context/DataContext'
 import { cn } from '../../lib/utils'
 
@@ -22,6 +23,7 @@ export function VerificationReportPage() {
   const navigate = useNavigate()
   const { verificationReports } = useData()
   const report = findReport(id ?? '', verificationReports) ?? verificationReports[0]
+  const timesheetId = report?.timesheetId ?? id ?? ''
 
   const scoreCards = [
     { label: 'OCR Accuracy', value: `${report.ocrAccuracy}%`, icon: Scan, color: 'text-blue-600' },
@@ -85,6 +87,10 @@ export function VerificationReportPage() {
               </motion.div>
             )
           })}
+        </div>
+
+        <div className="mb-6">
+          <AnomalyPanel entityId={timesheetId} entityType="timesheet" autoDetect={false} />
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import apiRoutes from './routes/api.js'
 import importRoutes from './routes/import.js'
+import reviewRoutes from './routes/review.js'
 import { initPostgres, stopPostgres } from './db/postgres.js'
 import { initMySQL, stopMySQL } from './db/mysql.js'
 import { seedPostgres, seedMySQL } from './db/seed.js'
@@ -14,8 +15,10 @@ const PORT = Number(process.env.PORT) || 3001
 
 app.use(cors({ origin: ['http://localhost:5173', 'http://127.0.0.1:5173'] }))
 app.use(express.json())
-app.use('/api', apiRoutes)
+// More specific /api/* mounts must come before the general /api router
 app.use('/api/import', importRoutes)
+app.use('/api/review', reviewRoutes)
+app.use('/api', apiRoutes)
 
 async function start() {
   console.log('\n🚀 FlowInvoice AI — Starting database connections...\n')

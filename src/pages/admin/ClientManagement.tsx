@@ -29,13 +29,11 @@ export function ClientManagement() {
     {
       key: 'actions',
       header: 'Actions',
-      render: () => (
+      render: (r) => (
         <div className="flex gap-2">
-          <button className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400">View</button>
-          <button className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-400">Edit</button>
           <button
-            onClick={(e) => { e.stopPropagation(); navigate('/admin/settings') }}
-            className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-400"
+            onClick={(e) => { e.stopPropagation(); navigate(`/admin/clients/configure/${r.id}`) }}
+            className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-400"
           >
             Configure
           </button>

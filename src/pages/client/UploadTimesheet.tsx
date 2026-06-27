@@ -32,6 +32,26 @@ export function UploadTimesheet() {
   const [fileName, setFileName] = useState('')
   const [error, setError] = useState('')
 
+  const handleDownloadTemplate = async () => {
+    setError('')
+    try {
+      const res = await fetch(api.downloadTemplate())
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.error || `Download failed (${res.status})`)
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'timesheet-template.xlsx'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not download template. Start the API with: npm run dev:all')
+    }
+  }
+
   const processFile = useCallback(async (file: File) => {
     setError('')
     setUploading(true)
@@ -164,12 +184,13 @@ export function UploadTimesheet() {
           )}
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            <a
-              href={api.downloadTemplate()}
+            <button
+              type="button"
+              onClick={handleDownloadTemplate}
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400"
             >
               <Download className="h-4 w-4" /> Download Excel Template
-            </a>
+            </button>
             <p className="text-xs text-slate-500">
               Or place your file in <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">data/import/</code> and run{' '}
               <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">npm run import:excel</code>

@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
     "server": "tsx server/index.ts",
+    "postinstall": "tsx server/scripts/generate-template.ts",
     "excel:template": "tsx server/scripts/generate-template.ts",
     "import:excel": "tsx server/scripts/import-file.ts",
     "import:tasc": "tsx server/scripts/import-tasc-database.ts",

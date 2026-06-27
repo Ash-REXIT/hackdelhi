@@ -2,6 +2,7 @@ export type UserRole = 'client' | 'admin'
 
 export type StatusType =
   | 'approved'
+  | 'rejected'
   | 'pending'
   | 'critical'
   | 'processing'
@@ -123,4 +124,35 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: string
+}
+
+export interface Anomaly {
+  id: number
+  entityType: 'timesheet' | 'invoice'
+  entityId: string
+  clientId?: string
+  anomalyType: string
+  severity: 'critical' | 'warning' | 'info'
+  description: string
+  status: 'open' | 'approved' | 'rejected' | 'waived'
+  detectedAt: string
+  resolvedBy?: string
+  resolutionNote?: string
+}
+
+export interface ValidationRuleResult {
+  ruleName: string
+  passed: boolean
+  message: string
+  severity: 'critical' | 'warning' | 'info'
+}
+
+export interface ReviewDecision {
+  id: number
+  entityType: string
+  entityId: string
+  decision: string
+  decidedBy: string
+  reason: string
+  createdAt: string
 }

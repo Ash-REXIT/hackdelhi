@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Upload, FileText, ClipboardCheck, Receipt,
   Bell, Bot, User, Users, Inbox, Brain, FileCheck, Send,
   AlertTriangle, BarChart3, ScrollText, Settings, ChevronLeft,
-  Sparkles, LogOut,
+  Sparkles, LogOut, Mail, Cog,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useApp } from '../../context/AppContext'
@@ -22,6 +22,8 @@ const clientNav = [
 const adminNav = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/clients', icon: Users, label: 'Client Management' },
+  { to: '/admin/ingestion', icon: Mail, label: 'Email Ingestion' },
+  { to: '/admin/erp', icon: Cog, label: 'ERP Orchestrator' },
   { to: '/admin/timesheets', icon: Inbox, label: 'Incoming Timesheets' },
   { to: '/admin/review', icon: Brain, label: 'AI Review Queue' },
   { to: '/admin/invoice-validation', icon: FileCheck, label: 'Invoice Validation' },

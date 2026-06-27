@@ -34,6 +34,33 @@ router.get('/clients/:id', async (req, res) => {
   res.json(mapClient(rows[0]))
 })
 
+router.put('/clients/:id', async (req, res) => {
+  const {
+    companyName, contactPerson, email, billingEntity, currency,
+    dispatchRule, validationProfile, status, billingRate,
+  } = req.body
+  const { rows } = await getPool().query(
+    `UPDATE clients SET
+      company_name = COALESCE($2, company_name),
+      contact_person = COALESCE($3, contact_person),
+      email = COALESCE($4, email),
+      billing_entity = COALESCE($5, billing_entity),
+      currency = COALESCE($6, currency),
+      dispatch_rule = COALESCE($7, dispatch_rule),
+      validation_profile = COALESCE($8, validation_profile),
+      status = COALESCE($9, status),
+      billing_rate = COALESCE($10, billing_rate)
+     WHERE id = $1 RETURNING *`,
+    [
+      req.params.id,
+      companyName, contactPerson, email, billingEntity, currency,
+      dispatchRule, validationProfile, status, billingRate,
+    ]
+  )
+  if (!rows[0]) return res.status(404).json({ error: 'Not found' })
+  res.json(mapClient(rows[0]))
+})
+
 router.get('/timesheets', async (req, res) => {
   const clientId = req.query.clientId as string | undefined
   let query = 'SELECT * FROM timesheets ORDER BY upload_date DESC'

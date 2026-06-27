@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Copy, PenLine, Image, FolderX, UserX, Shield, Clock, CalendarDays,
+  XCircle, CheckCircle,
 } from 'lucide-react'
 import { Header } from '../../components/layout/Header'
 import { DataTable, type Column } from '../../components/ui/DataTable'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { exceptions } from '../../data/mockData'
 import { useData } from '../../context/DataContext'
+import { api } from '../../api/client'
 import { formatDateTime, cn } from '../../lib/utils'
-import type { Timesheet } from '../../types'
+import type { Timesheet, Anomaly } from '../../types'
 
 const exceptionIcons: Record<string, typeof Copy> = {
   'Duplicate Timesheets': Copy,
@@ -27,17 +29,34 @@ export function ExceptionCenter() {
   const navigate = useNavigate()
   const { timesheets } = useData()
   const [filter, setFilter] = useState<string | null>(null)
+  const [anomalies, setAnomalies] = useState<Anomaly[]>([])
+  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'rejected'>('all')
 
-  const filteredTimesheets = filter
-    ? timesheets.filter((t) => {
+  useEffect(() => {
+    api.getAnomalies(undefined, 'open').then((d) => setAnomalies(d as unknown as Anomaly[])).catch(() => {})
+  }, [])
+
+  const rejectedCount = timesheets.filter((t) => t.status === 'rejected').length
+  const openAnomalyCount = anomalies.filter((a) => a.status === 'open').length
+
+  const filteredTimesheets = (() => {
+    let list = timesheets
+    if (statusFilter === 'rejected') list = list.filter((t) => t.status === 'rejected')
+    else if (statusFilter === 'open') list = list.filter((t) => ['pending', 'critical', 'returned'].includes(t.status))
+    else list = list.filter((t) => t.status !== 'approved' && t.status !== 'dispatched')
+
+    if (filter) {
+      list = list.filter((t) => {
         if (filter === 'Duplicate Timesheets') return t.riskScore > 60
         if (filter === 'Poor Image Quality') return t.ocrAccuracy < 85
         if (filter === 'Project Code Missing') return t.status === 'pending'
         if (filter === 'Invalid Employee') return t.status === 'critical'
         if (filter === 'High Overtime') return t.riskScore > 40
-        return t.status !== 'approved'
+        return true
       })
-    : timesheets.filter((t) => t.status !== 'approved')
+    }
+    return list
+  })()
 
   const columns: Column<Timesheet>[] = [
     { key: 'id', header: 'Timesheet ID', sortable: true },
@@ -50,13 +69,16 @@ export function ExceptionCenter() {
     { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} /> },
     {
       key: 'action',
-      header: 'Action',
+      header: 'HITL Action',
       render: (r) => (
         <button
           onClick={(e) => { e.stopPropagation(); navigate(`/admin/evidence/${r.id}`) }}
-          className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700"
+          className={cn(
+            'rounded-lg px-3 py-1 text-xs font-medium',
+            r.status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'
+          )}
         >
-          Investigate
+          {r.status === 'rejected' ? 'View Rejection' : 'Review'}
         </button>
       ),
     },
@@ -64,8 +86,32 @@ export function ExceptionCenter() {
 
   return (
     <>
-      <Header title="Exception Center" subtitle="Monitor and resolve billing exceptions" />
+      <Header title="Exception Center" subtitle="Anomalies, rejections, and human-in-the-loop routing (§4.5)" />
       <div className="p-6 lg:p-8">
+        <div className="mb-6 grid grid-cols-3 gap-4">
+          {[
+            { label: 'Open Anomalies', value: openAnomalyCount, icon: Shield, color: 'text-amber-600' },
+            { label: 'Rejected', value: rejectedCount, icon: XCircle, color: 'text-red-600' },
+            { label: 'Approved (HITL)', value: timesheets.filter((t) => t.status === 'approved').length, icon: CheckCircle, color: 'text-emerald-600' },
+          ].map((s) => (
+            <div key={s.label} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200/60 dark:bg-slate-900">
+              <s.icon className={cn('mb-2 h-5 w-5', s.color)} />
+              <p className="text-2xl font-bold">{s.value}</p>
+              <p className="text-xs text-slate-500">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mb-4 flex gap-2">
+          {(['all', 'open', 'rejected'] as const).map((f) => (
+            <button key={f} onClick={() => setStatusFilter(f)}
+              className={cn('rounded-lg px-3 py-1.5 text-xs font-medium capitalize',
+                statusFilter === f ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600')}>
+              {f === 'all' ? 'All Exceptions' : f}
+            </button>
+          ))}
+        </div>
+
         <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
           {exceptions.map((ex, i) => {
             const Icon = exceptionIcons[ex.type] ?? Shield

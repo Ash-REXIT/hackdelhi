@@ -24,6 +24,9 @@ import { ExceptionCenter } from './pages/admin/ExceptionCenter'
 import { Analytics } from './pages/admin/Analytics'
 import { AuditLogs } from './pages/admin/AuditLogs'
 import { AdminNotifications, AdminSettings, AdminCopilot } from './pages/admin/AdminNotifications'
+import { ClientConfigure } from './pages/admin/ClientConfigure'
+import { EmailIngestion } from './pages/admin/EmailIngestion'
+import { ERPOrchestrator } from './pages/admin/ERPOrchestrator'
 
 const clientChatSuggestions = [
   'Explain this verification',
@@ -79,6 +82,9 @@ export default function App() {
       >
         <Route index element={<AdminDashboard />} />
         <Route path="clients" element={<ClientManagement />} />
+        <Route path="clients/configure/:id" element={<ClientConfigure />} />
+        <Route path="ingestion" element={<EmailIngestion />} />
+        <Route path="erp" element={<ERPOrchestrator />} />
         <Route path="timesheets" element={<IncomingTimesheets />} />
         <Route path="review" element={<AIReviewQueue />} />
         <Route path="evidence/:id" element={<AIEvidenceEngine />} />
