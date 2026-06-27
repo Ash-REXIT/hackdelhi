@@ -4,7 +4,8 @@ import {
   Clock, 
   Send, 
   AlertTriangle,
-  FileText
+  FileText,
+  MoreHorizontal
 } from 'lucide-react';
 
 export function Invoices() {
@@ -29,22 +30,22 @@ export function Invoices() {
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden">
-      <div className="h-16 border-b border-border flex items-end px-8 pb-0 bg-background shrink-0 space-x-6">
+      <div className="h-16 border-b border-border/50 flex items-end px-10 pb-0 bg-card shrink-0 space-x-8 shadow-sm relative z-10">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 pb-3 px-1 border-b-2 transition-colors ${
+              className={`flex items-center space-x-2.5 pb-4 px-1 border-b-2 transition-colors ${
                 isActive 
                   ? 'border-primary text-foreground' 
-                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border/80'
               }`}
             >
               <tab.icon size={16} className={isActive ? tab.color : ''} />
               <span className="font-medium text-sm">{tab.label}</span>
-              <span className={`text-xs font-mono px-1.5 py-0.5 rounded-full ${isActive ? 'bg-primary/10 text-primary' : 'bg-panel'}`}>
+              <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${isActive ? 'bg-primary/10 text-primary' : 'bg-panel border border-border/50'}`}>
                 {tab.count}
               </span>
             </button>
@@ -52,26 +53,34 @@ export function Invoices() {
         })}
       </div>
       
-      <div className="flex-1 overflow-y-auto p-8 bg-[#090b0e]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="flex-1 overflow-y-auto p-10 bg-background">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl">
           {filteredInvoices.map((invoice) => (
-            <div key={invoice.id} className="bg-panel border border-border rounded-lg p-5 hover:border-primary/50 transition-colors cursor-pointer group flex flex-col">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 bg-card rounded border border-border text-muted-foreground group-hover:text-primary transition-colors">
+            <div key={invoice.id} className="bg-card border border-border/60 rounded-xl p-6 hover:border-primary/50 transition-all cursor-pointer group flex flex-col shadow-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+              
+              <div className="flex justify-between items-start mb-5 relative z-10">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-panel rounded-lg border border-border/50 text-muted-foreground group-hover:text-primary transition-colors">
                     <FileText size={16} />
                   </div>
-                  <span className="font-mono text-xs text-muted-foreground uppercase tracking-wide">{invoice.id}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground uppercase tracking-wide bg-background px-2 py-1 rounded border border-border/50">{invoice.id}</span>
                 </div>
+                <button className="text-muted-foreground hover:text-foreground p-1 transition-colors opacity-0 group-hover:opacity-100">
+                  <MoreHorizontal size={16} />
+                </button>
               </div>
-              <h3 className="font-medium text-foreground text-lg mb-1">{invoice.client}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{invoice.project}</p>
               
-              <div className="mt-auto pt-4 border-t border-border flex justify-between items-end">
-                <div className="text-xs text-muted-foreground font-mono">
+              <div className="relative z-10">
+                <h3 className="font-medium text-foreground text-lg mb-1">{invoice.client}</h3>
+                <p className="text-sm text-muted-foreground mb-6">{invoice.project}</p>
+              </div>
+              
+              <div className="mt-auto pt-5 border-t border-border/50 flex justify-between items-end relative z-10">
+                <div className="text-xs text-muted-foreground font-medium">
                   {invoice.date}
                 </div>
-                <div className="font-mono font-medium text-foreground">
+                <div className="font-mono font-medium text-foreground text-lg tracking-tight">
                   {invoice.amount}
                 </div>
               </div>
@@ -79,8 +88,8 @@ export function Invoices() {
           ))}
           
           {filteredInvoices.length === 0 && (
-            <div className="col-span-full py-12 flex flex-col items-center justify-center text-muted-foreground">
-              <FileText size={48} className="mb-4 opacity-20" />
+            <div className="col-span-full py-20 flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed border-border/50 rounded-xl bg-card">
+              <FileText size={40} className="mb-4 opacity-20" />
               <p className="text-sm font-medium">No invoices found in this category.</p>
             </div>
           )}

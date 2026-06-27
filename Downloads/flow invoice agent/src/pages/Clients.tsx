@@ -19,66 +19,68 @@ export function Clients() {
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden">
-      <div className="h-16 border-b border-border flex items-center justify-between px-8 bg-background shrink-0">
+      <div className="h-16 border-b border-border/50 flex items-center justify-between px-10 bg-card shrink-0 shadow-sm relative z-10">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Client Directory</h1>
-          <p className="text-xs text-muted-foreground font-mono mt-1">6 Enterprise Partners</p>
+          <h1 className="text-xl font-medium text-foreground">Client Directory</h1>
+          <p className="text-[11px] text-muted-foreground font-mono mt-1 tracking-wide uppercase">6 Enterprise Partners</p>
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-8 bg-[#090b0e]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex-1 overflow-y-auto p-10 bg-background">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl">
           {clients.map((client, i) => (
-            <div key={i} className="bg-panel border border-border rounded-xl p-6 hover:border-primary/50 transition-all cursor-pointer group flex flex-col shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:border-primary/30 transition-colors">
-                    <Building2 size={20} />
+            <div key={i} className="bg-card border border-border/60 rounded-2xl p-7 hover:border-primary/50 transition-all cursor-pointer group flex flex-col shadow-sm relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
+              
+              <div className="flex items-center justify-between mb-8 relative z-10">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-panel border border-border/50 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors shadow-sm">
+                    <Building2 size={22} strokeWidth={2} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground text-lg">{client.name}</h3>
-                    <span className={`text-[10px] font-mono uppercase tracking-wide px-1.5 py-0.5 rounded ${client.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                    <h3 className="font-medium text-foreground text-lg mb-0.5">{client.name}</h3>
+                    <span className={`text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded ${client.status === 'active' ? 'bg-success/10 text-success' : 'bg-muted border border-border text-muted-foreground'}`}>
                       {client.status}
                     </span>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-sm relative z-10 mb-2">
                 <div className="flex flex-col">
-                  <span className="text-muted-foreground text-xs font-mono uppercase tracking-wide flex items-center mb-1">
-                    <Briefcase size={12} className="mr-1" /> Projects
+                  <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-wide flex items-center mb-1.5">
+                    <Briefcase size={12} className="mr-1.5" /> Projects
                   </span>
                   <span className="font-medium text-foreground">{client.projects} Active</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-muted-foreground text-xs font-mono uppercase tracking-wide flex items-center mb-1">
-                    <Users size={12} className="mr-1" /> Employees
+                  <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-wide flex items-center mb-1.5">
+                    <Users size={12} className="mr-1.5" /> Employees
                   </span>
-                  <span className="font-medium text-foreground">{client.employees} Billed</span>
+                  <span className="font-medium text-foreground font-mono">{client.employees} <span className="font-sans font-normal text-muted-foreground ml-1">Billed</span></span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-muted-foreground text-xs font-mono uppercase tracking-wide flex items-center mb-1">
-                    <FileText size={12} className="mr-1" /> Invoices
+                  <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-wide flex items-center mb-1.5">
+                    <FileText size={12} className="mr-1.5" /> Invoices
                   </span>
-                  <span className="font-medium text-foreground">{client.invoices} YTD</span>
+                  <span className="font-medium text-foreground font-mono">{client.invoices} <span className="font-sans font-normal text-muted-foreground ml-1">YTD</span></span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-muted-foreground text-xs font-mono uppercase tracking-wide flex items-center mb-1">
-                    <DollarSign size={12} className="mr-1" /> Revenue
+                  <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-wide flex items-center mb-1.5">
+                    <DollarSign size={12} className="mr-1.5" /> Revenue
                   </span>
-                  <span className="font-medium text-foreground">{client.revenue} YTD</span>
+                  <span className="font-medium text-success font-mono">{client.revenue} <span className="font-sans font-normal text-muted-foreground ml-1">YTD</span></span>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+              <div className="mt-8 pt-5 border-t border-border/50 flex items-center justify-between relative z-10">
                 <div className="flex items-center space-x-2">
                   <AlertTriangle size={14} className={client.pending > 0 ? "text-warning" : "text-muted-foreground"} />
                   <span className={`text-sm font-medium ${client.pending > 0 ? "text-warning" : "text-muted-foreground"}`}>
                     {client.pending} Pending Reviews
                   </span>
                 </div>
-                <button className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                   View Details →
                 </button>
               </div>
