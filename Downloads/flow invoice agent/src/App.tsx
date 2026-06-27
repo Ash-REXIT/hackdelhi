@@ -11,14 +11,23 @@ import { OperationsShell } from './components/layout/OperationsShell';
 import { Login } from './pages/Login';
 
 // Internal TASC AI Workspace Pages (Admin)
-import { Workspace } from './pages/Workspace';
+import { FinOpsDashboard } from './pages/FinOpsDashboard';
+import { TimesheetInbox } from './pages/TimesheetInbox';
+import { AIExtraction } from './pages/AIExtraction';
+import { ValidationCenter } from './pages/ValidationCenter';
 import { ReviewQueue } from './pages/ReviewQueue';
 import { ReviewSession } from './pages/ReviewSession';
-import { Invoices } from './pages/Invoices';
-import { Clients } from './pages/Clients';
+import { ERPQueue } from './pages/ERPQueue';
+import { DispatchCenter } from './pages/DispatchCenter';
+import { ClientConfiguration } from './pages/ClientConfiguration';
+import { BusinessRules } from './pages/BusinessRules';
+import { MasterData } from './pages/MasterData';
+import { Invoices } from './pages/Invoices'; // Will be removed or repurposed
+import { Clients } from './pages/Clients'; // Will be removed or repurposed
 import { Knowledge } from './pages/Knowledge';
 import { Reports } from './pages/Reports';
 import { DataView } from './pages/DataView';
+import { SystemSettings } from './pages/SystemSettings';
 
 // Client Portal Pages (Client)
 import { PortalHome } from './pages/portal/PortalHome';
@@ -71,14 +80,25 @@ function App() {
         <ProtectedRoute allowedRoles={['admin']}>
           <AppShell>
             <Routes>
-              <Route path="/" element={<Workspace />} />
+              <Route path="/" element={<FinOpsDashboard />} />
+              <Route path="/inbox" element={<TimesheetInbox />} />
+              <Route path="/extraction" element={<AIExtraction />} />
+              <Route path="/validation" element={<ValidationCenter />} />
               <Route path="/review" element={<ReviewQueue />} />
               <Route path="/review/:id" element={<ReviewSession />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/clients" element={<Clients />} />
+              <Route path="/erp" element={<ERPQueue />} />
+              <Route path="/dispatch" element={<DispatchCenter />} />
+              <Route path="/clients" element={<ClientConfiguration />} />
+              <Route path="/rules" element={<BusinessRules />} />
+              <Route path="/master-data" element={<MasterData />} />
+              <Route path="/analytics" element={<Reports />} />
               <Route path="/knowledge" element={<Knowledge />} />
-              <Route path="/reports" element={<Reports />} />
+              
+              {/* Settings / Configuration */}
               <Route path="/settings" element={<DataView title="System Settings" />} />
+              
+              {/* Legacy routes, keeping temporarily just in case */}
+              <Route path="/invoices" element={<Invoices />} />
             </Routes>
           </AppShell>
         </ProtectedRoute>

@@ -1,141 +1,232 @@
+import { useState } from 'react';
 import { 
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart, Bar
-} from 'recharts';
-import { 
+  BarChart3, 
   TrendingUp, 
-  Clock, 
-  CheckCircle,
-  Zap
+  TrendingDown,
+  Calendar,
+  Download,
+  Filter,
+  PieChart,
+  Activity,
+  ArrowUpRight,
+  MoreHorizontal
 } from 'lucide-react';
 
-const revenueData = [
-  { name: 'Mon', value: 4000 },
-  { name: 'Tue', value: 3000 },
-  { name: 'Wed', value: 5000 },
-  { name: 'Thu', value: 8780 },
-  { name: 'Fri', value: 6890 },
-  { name: 'Sat', value: 2390 },
-  { name: 'Sun', value: 3490 },
-];
-
-const exceptionData = [
-  { name: 'Missing ID', count: 45 },
-  { name: 'Overtime', count: 32 },
-  { name: 'Illegible', count: 18 },
-  { name: 'No Project', count: 12 },
-];
-
 export function Reports() {
+  const [timeRange, setTimeRange] = useState('30d');
+
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden">
-      <div className="h-16 border-b border-border/50 flex items-center justify-between px-10 bg-card shrink-0 shadow-sm relative z-10">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Header */}
+      <div className="pt-8 px-10 pb-6 shrink-0 border-b border-[#2A3442]/50 bg-[#0B0F14] z-10 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-medium text-foreground tracking-tight">Executive Insights</h1>
-          <p className="text-[11px] text-muted-foreground font-mono mt-1 uppercase tracking-widest">Last 7 Days</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground mb-1">Analytics & Insights</h1>
+          <p className="text-muted-foreground text-[15px]">Monitor AI performance, processing volumes, and automation rates.</p>
         </div>
-        <button className="bg-panel border border-border/80 hover:bg-card hover:border-primary/50 text-foreground px-5 py-2 rounded-md text-sm font-medium transition-colors shadow-sm">
-          Export PDF
-        </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex bg-panel border border-border rounded-lg p-1">
+            <button onClick={() => setTimeRange('7d')} className={`px-3 py-1 text-sm rounded-md transition-colors ${timeRange === '7d' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>7D</button>
+            <button onClick={() => setTimeRange('30d')} className={`px-3 py-1 text-sm rounded-md transition-colors ${timeRange === '30d' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>30D</button>
+            <button onClick={() => setTimeRange('90d')} className={`px-3 py-1 text-sm rounded-md transition-colors ${timeRange === '90d' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>90D</button>
+          </div>
+          <button className="px-4 py-2 bg-panel border border-border hover:bg-card text-foreground rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
+            <Download size={16} className="mr-2" /> Export Report
+          </button>
+        </div>
       </div>
-      
-      <div className="flex-1 overflow-y-auto p-10 bg-background">
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* KPI Row */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-card border border-border/60 p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
-              <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest mb-3 flex items-center relative z-10">
-                <TrendingUp size={14} className="mr-2 text-primary" /> Revenue Processed
-              </span>
-              <div className="relative z-10">
-                <div className="text-3xl font-medium tracking-tight text-foreground mb-1 font-mono">$33.5K</div>
-                <div className="text-xs text-success flex items-center font-medium">+12.5% from last week</div>
-              </div>
-            </div>
-            
-            <div className="bg-card border border-border/60 p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
-              <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest mb-3 flex items-center relative z-10">
-                <Zap size={14} className="mr-2 text-primary" /> Manual Work Saved
-              </span>
-              <div className="relative z-10">
-                <div className="text-3xl font-medium tracking-tight text-foreground mb-1 font-mono">142 <span className="text-lg font-sans font-normal text-muted-foreground">hrs</span></div>
-                <div className="text-xs text-success flex items-center font-medium">~$7,100 operational savings</div>
-              </div>
-            </div>
-            
-            <div className="bg-card border border-border/60 p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
-              <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest mb-3 flex items-center relative z-10">
-                <Clock size={14} className="mr-2 text-warning" /> Avg Processing Time
-              </span>
-              <div className="relative z-10">
-                <div className="text-3xl font-medium tracking-tight text-foreground mb-1 font-mono">18<span className="text-lg font-sans font-normal text-muted-foreground">s</span></div>
-                <div className="text-xs text-success flex items-center font-medium">-2s from last week</div>
-              </div>
-            </div>
 
-            <div className="bg-card border border-border/60 p-6 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none"></div>
-              <span className="text-muted-foreground text-[11px] font-mono uppercase tracking-widest mb-3 flex items-center relative z-10">
-                <CheckCircle size={14} className="mr-2 text-success" /> AI Accuracy
-              </span>
-              <div className="relative z-10">
-                <div className="text-3xl font-medium tracking-tight text-foreground mb-1 font-mono">94%</div>
-                <div className="text-xs text-muted-foreground flex items-center">Straight-through processing</div>
-              </div>
-            </div>
+      <div className="flex-1 overflow-y-auto p-10 bg-[#0B0F14]">
+        <div className="max-w-7xl mx-auto space-y-6">
+          
+          {/* Top KPIs */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <KPICard 
+              title="Total Processed Value" 
+              value="$4.2M" 
+              trend="+12.5%" 
+              trendUp={true} 
+              subtitle="vs previous period" 
+            />
+            <KPICard 
+              title="Straight-Through Rate" 
+              value="84.2%" 
+              trend="+4.1%" 
+              trendUp={true} 
+              subtitle="Fully automated invoices" 
+            />
+            <KPICard 
+              title="Avg Processing Time" 
+              value="1.2m" 
+              trend="-32%" 
+              trendUp={true} 
+              subtitle="From intake to ERP" 
+            />
+            <KPICard 
+              title="Exceptions Flagged" 
+              value="342" 
+              trend="+2.4%" 
+              trendUp={false} 
+              subtitle="Required human review" 
+            />
           </div>
 
-          {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 bg-card border border-border/60 rounded-2xl p-6 shadow-sm relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none rounded-2xl"></div>
-              <h3 className="text-[11px] font-medium text-muted-foreground mb-8 font-mono uppercase tracking-widest relative z-10">Revenue Velocity</h3>
-              <div className="h-64 w-full relative z-10">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="name" stroke="#4b5563" fontSize={12} tickLine={false} axisLine={false} fontFamily="Inter" />
-                    <YAxis stroke="#4b5563" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} fontFamily="Inter" />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#151A21', border: '1px solid #2A3442', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                      itemStyle={{ color: '#3B82F6', fontWeight: 500, fontFamily: 'Inter' }}
-                    />
-                    <Area type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+            
+            {/* Chart 1 */}
+            <div className="lg:col-span-2 bg-card border border-border/60 rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-semibold text-lg text-foreground flex items-center">
+                  <Activity className="mr-2 text-primary" size={20} /> Processing Volume over Time
+                </h3>
+                <button className="text-muted-foreground hover:text-foreground"><MoreHorizontal size={18} /></button>
+              </div>
+              <div className="h-64 flex items-end justify-between space-x-2 px-2">
+                {/* Mock Bar Chart */}
+                {[45, 55, 40, 60, 75, 65, 80, 95, 85, 100, 90, 85].map((val, i) => (
+                  <div key={i} className="w-full relative group">
+                    <div 
+                      className="absolute bottom-0 w-full bg-primary/20 hover:bg-primary/40 rounded-t-md transition-colors"
+                      style={{ height: `${val}%` }}
+                    >
+                      <div className="absolute bottom-0 w-full bg-primary rounded-t-md opacity-80" style={{ height: `${val * 0.8}%` }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between mt-4 text-xs font-mono text-muted-foreground uppercase tracking-widest px-2">
+                <span>Oct 01</span>
+                <span>Oct 15</span>
+                <span>Oct 30</span>
               </div>
             </div>
 
-            <div className="bg-card border border-border/60 rounded-2xl p-6 flex flex-col shadow-sm relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none rounded-2xl"></div>
-              <h3 className="text-[11px] font-medium text-muted-foreground mb-8 font-mono uppercase tracking-widest relative z-10">Exception Breakdown</h3>
-              <div className="flex-1 w-full relative -left-4 z-10">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={exceptionData} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} fontFamily="Inter" />
-                    <Tooltip 
-                      cursor={{fill: '#1D2430'}}
-                      contentStyle={{ backgroundColor: '#151A21', border: '1px solid #2A3442', borderRadius: '8px' }}
-                      itemStyle={{ fontFamily: 'Inter' }}
-                    />
-                    <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} barSize={24} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* AI Confidence Breakdown */}
+            <div className="bg-card border border-border/60 rounded-xl p-6 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="font-semibold text-lg text-foreground flex items-center">
+                  <PieChart className="mr-2 text-success" size={20} /> Extraction Confidence
+                </h3>
               </div>
+              
+              <div className="flex-1 flex flex-col justify-center space-y-6">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-foreground">High Confidence (>95%)</span>
+                    <span className="text-muted-foreground">82%</span>
+                  </div>
+                  <div className="w-full bg-panel rounded-full h-2">
+                    <div className="bg-success h-2 rounded-full" style={{ width: '82%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-foreground">Medium Confidence (80-95%)</span>
+                    <span className="text-muted-foreground">14%</span>
+                  </div>
+                  <div className="w-full bg-panel rounded-full h-2">
+                    <div className="bg-warning h-2 rounded-full" style={{ width: '14%' }}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="font-medium text-foreground">Low Confidence (<80%)</span>
+                    <span className="text-muted-foreground">4%</span>
+                  </div>
+                  <div className="w-full bg-panel rounded-full h-2">
+                    <div className="bg-danger h-2 rounded-full" style={{ width: '4%' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Tables */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-6 border-b border-border/50 bg-panel/30 flex items-center justify-between">
+                <h3 className="font-semibold text-foreground">Top Exception Categories</h3>
+                <button className="text-sm text-primary hover:underline font-medium">View All</button>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-panel border-b border-border/50 text-xs font-mono text-muted-foreground uppercase">
+                  <tr>
+                    <th className="px-6 py-3 text-left font-medium">Rule Violated</th>
+                    <th className="px-6 py-3 text-right font-medium">Occurrences</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Missing Manager Signature</td>
+                    <td className="px-6 py-3 text-right font-mono text-muted-foreground">142</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Maximum Weekly Hours Exceeded</td>
+                    <td className="px-6 py-3 text-right font-mono text-muted-foreground">89</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Unrecognized Client Name</td>
+                    <td className="px-6 py-3 text-right font-mono text-muted-foreground">45</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Weekend Billing Detected</td>
+                    <td className="px-6 py-3 text-right font-mono text-muted-foreground">22</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="bg-card border border-border/60 rounded-xl overflow-hidden shadow-sm">
+              <div className="p-6 border-b border-border/50 bg-panel/30 flex items-center justify-between">
+                <h3 className="font-semibold text-foreground">Top Clients by Volume</h3>
+                <button className="text-sm text-primary hover:underline font-medium">View All</button>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-panel border-b border-border/50 text-xs font-mono text-muted-foreground uppercase">
+                  <tr>
+                    <th className="px-6 py-3 text-left font-medium">Client Name</th>
+                    <th className="px-6 py-3 text-right font-medium">Total Billed</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/30">
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Infosys Ltd</td>
+                    <td className="px-6 py-3 text-right font-mono font-medium text-success">$1,450,200</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">TCS</td>
+                    <td className="px-6 py-3 text-right font-mono font-medium text-success">$985,000</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Wipro</td>
+                    <td className="px-6 py-3 text-right font-mono font-medium text-success">$420,500</td>
+                  </tr>
+                  <tr className="hover:bg-panel/50">
+                    <td className="px-6 py-3 font-medium text-foreground">Accenture</td>
+                    <td className="px-6 py-3 text-right font-mono font-medium text-success">$210,000</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
         </div>
       </div>
+    </div>
+  );
+}
+
+function KPICard({ title, value, trend, trendUp, subtitle }: any) {
+  return (
+    <div className="bg-card border border-border/60 rounded-xl p-6 shadow-sm">
+      <div className="text-sm font-medium text-muted-foreground mb-4">{title}</div>
+      <div className="flex items-baseline space-x-3 mb-2">
+        <div className="text-3xl font-semibold text-foreground tracking-tight">{value}</div>
+        <div className={`flex items-center text-sm font-medium ${trendUp ? 'text-success' : 'text-danger'}`}>
+          {trendUp ? <TrendingUp size={16} className="mr-1" /> : <TrendingDown size={16} className="mr-1" />}
+          {trend}
+        </div>
+      </div>
+      <div className="text-xs text-muted-foreground">{subtitle}</div>
     </div>
   );
 }
