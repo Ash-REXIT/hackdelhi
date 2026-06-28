@@ -307,6 +307,8 @@ async function seedDemoUsers(clientCodeMap: Map<string, string>): Promise<void> 
     { email: 'finops@tia.local', name: 'FinOps Admin (legacy)', role: 'FINOPS' as const, clientId: null },
     { email: 'finance@tia.local', name: 'Finance Manager (legacy)', role: 'FINANCE' as const, clientId: null },
     { email: 'client@tia.local', name: 'Client User (legacy)', role: 'CLIENT' as const, clientId: cl001Id || null },
+    { email: 'ashwinpranav360@gmail.com', name: 'Ashwin (FinOps)', role: 'FINOPS' as const, clientId: null },
+    { email: 'interdell11@gmail.com', name: 'Client Portal (Google)', role: 'CLIENT' as const, clientId: cl001Id || null },
   ];
 
   for (const u of users) {

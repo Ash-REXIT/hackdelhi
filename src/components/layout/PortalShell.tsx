@@ -1,12 +1,13 @@
 import React from 'react';
 import { PortalSidebar } from './PortalSidebar';
+import { AiAssistantWidget } from '../AiAssistantWidget';
 import { Bell, Search } from 'lucide-react';
 
 export function PortalShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background font-sans text-foreground">
       <PortalSidebar />
-      <div className="flex-1 flex flex-col h-full bg-[#0B0F14] relative z-0">
+      <div className="flex-1 flex flex-col h-full bg-[#0B0F14] relative z-0 overflow-hidden">
         <header className="h-16 border-b border-[#2A3442]/50 flex items-center justify-between px-10 bg-[#0B0F14] shrink-0 sticky top-0 z-20">
           <div className="flex items-center space-x-4">
             {/* Top Navigation breadcrumb/title can go here if needed */}
@@ -32,6 +33,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
             {children}
           </div>
         </main>
+        <AiAssistantWidget />
       </div>
     </div>
   );

@@ -27,4 +27,7 @@ export const config = {
   },
   seedExcelPath: process.env.SEED_EXCEL_PATH || path.resolve(__dirname, '../../data/TASC_Sample_Database.xlsx'),
   autoInvoiceConfidenceThreshold: parseFloat(process.env.AUTO_INVOICE_CONFIDENCE_THRESHOLD || '95'),
+  smallestAi: {
+    apiKey: process.env.SMALLEST_AI_API_KEY || '',
+  },
 };

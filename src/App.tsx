@@ -7,8 +7,9 @@ import { AppShell } from './components/layout/AppShell';
 import { PortalShell } from './components/layout/PortalShell';
 import { OperationsShell } from './components/layout/OperationsShell';
 
-// Auth Page
+// Auth Pages
 import { Login } from './pages/Login';
+import { AuthCallback } from './pages/AuthCallback';
 
 // Internal TASC AI Workspace Pages (Admin)
 import { FinOpsDashboard } from './pages/FinOpsDashboard';
@@ -56,6 +57,7 @@ function App() {
 
       {/* Login / Landing Page */}
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
 
       {/* Client Portal Routes (Role: 'client') */}
       <Route path="/portal/*" element={

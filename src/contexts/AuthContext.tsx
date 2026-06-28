@@ -8,6 +8,7 @@ interface AuthContextType {
   role: UIRole | null;
   user: User | null;
   login: (email: string) => Promise<void>;
+  completeOAuthLogin: (token: string) => Promise<User>;
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
@@ -56,6 +57,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('flowinvoice_role', backendToUiRole(res.user.role));
   };
 
+  const completeOAuthLogin = async (token: string): Promise<User> => {
+    setToken(token);
+    const me = await api<User>('/api/auth/me');
+    setUser(me);
+    localStorage.setItem('flowinvoice_role', backendToUiRole(me.role));
+    return me;
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -76,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: user ? backendToUiRole(user.role) : null,
         user,
         login,
+        completeOAuthLogin,
         logout,
         isAuthenticated: !!user,
         loading,

@@ -48,7 +48,7 @@ async def generate_json(prompt: str, fallback: dict, timeout: float = 20.0) -> d
     return await ollama.generate_json(prompt, fallback, timeout=timeout)
 
 
-async def generate_text(prompt: str, fallback: str = "") -> str:
+async def generate_text(prompt: str, fallback: str = "", timeout: float = 60.0) -> str:
     model = get_model()
     if model:
         try:
@@ -57,4 +57,4 @@ async def generate_text(prompt: str, fallback: str = "") -> str:
         except Exception as exc:
             print(f"Gemini error: {exc}")
 
-    return await ollama.generate_text(prompt, fallback)
+    return await ollama.generate_text(prompt, fallback, timeout=timeout)

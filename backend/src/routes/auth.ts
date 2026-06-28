@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { config } from '../lib/config';
+import { resolveOrCreateGoogleUser } from '../lib/googleAuth';
 import { prisma } from '../lib/prisma';
 import { signToken } from '../middleware/auth';
 import { authenticate } from '../middleware/auth';
@@ -21,23 +22,11 @@ if (config.google.clientId && config.google.clientSecret) {
           const email = profile.emails?.[0]?.value;
           if (!email) return done(new Error('No email from Google'));
 
-          let user = await prisma.user.findUnique({ where: { email } });
-          if (!user) {
-            user = await prisma.user.create({
-              data: {
-                email,
-                name: profile.displayName,
-                image: profile.photos?.[0]?.value,
-                googleId: profile.id,
-                role: 'CLIENT',
-              },
-            });
-          } else if (!user.googleId) {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { googleId: profile.id, image: profile.photos?.[0]?.value },
-            });
-          }
+          const user = await resolveOrCreateGoogleUser(email, {
+            id: profile.id,
+            displayName: profile.displayName,
+            photos: profile.photos,
+          });
           done(null, user);
         } catch (err) {
           done(err as Error);
@@ -66,7 +55,7 @@ router.get(
       role: user.role as 'CLIENT' | 'FINOPS' | 'FINANCE',
       clientId: user.clientId,
     });
-    res.redirect(`${config.frontendUrl}/auth/callback?token=${token}`);
+    res.redirect(`${config.frontendUrl}/auth/callback?token=${encodeURIComponent(token)}`);
   }
 );
 

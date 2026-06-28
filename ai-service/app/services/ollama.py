@@ -27,13 +27,13 @@ async def generate_json(prompt: str, fallback: dict, timeout: float = 20.0) -> d
         return fallback
 
 
-async def generate_text(prompt: str, fallback: str = "") -> str:
+async def generate_text(prompt: str, fallback: str = "", timeout: float = 60.0) -> str:
     settings = get_settings()
     if not settings.ollama_enabled:
         return fallback
 
     try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(
                 f"{settings.ollama_base_url.rstrip('/')}/api/generate",
                 json={

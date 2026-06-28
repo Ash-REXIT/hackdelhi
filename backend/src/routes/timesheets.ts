@@ -12,6 +12,8 @@ import { routeParams } from '../lib/request';
 import * as validationService from '../services/validationService';
 import * as explanationService from '../services/explanationService';
 import { isHackathonTestCase } from '../lib/testCase';
+import { transcribeAudio } from '../services/smallestAiService';
+import { submitVoiceTimesheet } from '../services/voiceSubmissionService';
 
 const router = Router();
 
@@ -47,6 +49,66 @@ const upload = multer({
       cb(new Error('Unsupported file type'));
     }
   },
+});
+
+const audioUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ok =
+      file.mimetype.startsWith('audio/') ||
+      file.mimetype === 'video/webm' ||
+      file.originalname.match(/\.(webm|wav|mp3|m4a|ogg|mp4)$/i);
+    if (ok) cb(null, true);
+    else cb(new Error('Unsupported audio format. Use webm, wav, or mp3.'));
+  },
+});
+
+router.post('/voice/transcribe', authenticate, audioUpload.single('audio'), async (req, res, next) => {
+  try {
+    if (req.tiaUser!.role !== 'CLIENT') {
+      return res.status(403).json({ success: false, error: 'Voice upload is available on the client portal only' });
+    }
+    if (!req.file) return res.status(400).json({ success: false, error: 'No audio recording uploaded' });
+
+    const transcript = await transcribeAudio(
+      req.file.buffer,
+      req.file.mimetype,
+      req.file.originalname || 'recording.webm'
+    );
+
+    res.json({ success: true, data: { transcript } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/voice/submit', authenticate, async (req, res, next) => {
+  try {
+    if (req.tiaUser!.role !== 'CLIENT') {
+      return res.status(403).json({ success: false, error: 'Voice upload is available on the client portal only' });
+    }
+
+    const clientId = req.tiaUser!.clientId;
+    if (!clientId) return res.status(400).json({ success: false, error: 'Client account not linked' });
+
+    const { transcript, payrollPeriod } = req.body as { transcript?: string; payrollPeriod?: string };
+    if (!transcript?.trim()) {
+      return res.status(400).json({ success: false, error: 'Transcript is required' });
+    }
+
+    const timesheet = await submitVoiceTimesheet({
+      clientId,
+      userId: req.tiaUser!.id,
+      userEmail: req.tiaUser!.email,
+      transcript: transcript.trim(),
+      payrollPeriod: payrollPeriod?.trim(),
+    });
+
+    res.status(201).json({ success: true, data: timesheet });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/upload', authenticate, upload.single('file'), async (req, res, next) => {
