@@ -1,0 +1,17 @@
+From: accounts@emiratessteelindustriesllc.com
+To: billing@tasc.com
+Subject: Reimbursement claim — June 2026
+
+Employee ID: EMP10001
+Employee Name: Carlos Smith
+Client Code: CL001
+Working days: 22
+Overtime hours: 0
+Payroll Period: June 2026
+Reimbursements: AED 18500.00
+Total Amount: AED 9834.13
+
+Please include travel and equipment reimbursements in this cycle.
+
+Regards,
+Emirates Steel Accounts

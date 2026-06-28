@@ -47,6 +47,46 @@ export function parseOvertimeFromText(ocrText: string): number {
   return 0;
 }
 
+export function parseTotalAmountFromText(ocrText: string): number {
+  const patterns = [
+    /(?:total\s*amount|payout|invoice\s*amount|amount\s*due)[:\s]+AED\s*([\d,.]+)/i,
+    /(?:total\s*amount|total)[:\s]+AED\s*([\d,.]+)/i,
+    /AED\s*([\d,.]+)\s*(?:total|payout)/i,
+  ];
+  for (const pattern of patterns) {
+    const m = ocrText.match(pattern);
+    if (m) return parseFloat(m[1].replace(/,/g, ''));
+  }
+  return 0;
+}
+
+export function normalizePayrollPeriod(value?: string | null): string {
+  if (!value) return 'June2026';
+  const compact = value.replace(/\s+/g, '');
+  if (/^june2026$/i.test(compact)) return 'June2026';
+  if (/june/i.test(value) && /2026/.test(value)) return 'June2026';
+  return compact;
+}
+
+export function cleanEmployeeName(raw: string): string {
+  return raw
+    .trim()
+    .split('\n')[0]
+    .replace(/\s*(client\s*code|employee\s*id|working\s*days|overtime|period|total\s*amount).*$/i, '')
+    .trim();
+}
+
+export function isLikelyBadEmployeeName(name?: string): boolean {
+  if (!name) return true;
+  return /client\s*code|employee\s*id|working\s*days|payroll\s*period/i.test(name);
+}
+
+export function parseReimbursementsFromText(ocrText: string): number {
+  const m = ocrText.match(/reimbursements?\s*[:\-]\s*AED\s*([\d,.]+)/i);
+  if (m) return parseFloat(m[1].replace(/,/g, ''));
+  return 0;
+}
+
 export function mergeExtractionWithOcr(
   ocrText: string,
   extracted: ExtractedTimesheetData,
@@ -62,7 +102,7 @@ export function mergeExtractionWithOcr(
     confidence.overtime = Math.max(confidence.overtime ?? 0, heuristic.confidence.overtime ?? 88);
   }
 
-  const numericFields: Array<keyof ExtractedTimesheetData> = ['workingDays', 'overtime', 'reimbursements'];
+  const numericFields: Array<keyof ExtractedTimesheetData> = ['workingDays', 'overtime', 'reimbursements', 'totalAmount'];
   for (const field of numericFields) {
     const hv = heuristic.data[field] as number;
     if (hv && (!data[field] || data[field] === 0)) {
@@ -74,10 +114,29 @@ export function mergeExtractionWithOcr(
   const stringFields: Array<keyof ExtractedTimesheetData> = ['employeeId', 'employeeName', 'clientCode', 'payrollPeriod'];
   for (const field of stringFields) {
     const hv = heuristic.data[field] as string;
+    if (!hv) continue;
+    if (field === 'employeeName' && data.employeeName && !isLikelyBadEmployeeName(data.employeeName)) {
+      continue;
+    }
+    if (field === 'employeeName' && isLikelyBadEmployeeName(data.employeeName) && hv) {
+      (data as Record<string, unknown>)[field] = hv;
+      confidence[field] = Math.max(confidence[field] ?? 0, heuristic.confidence[field] ?? 85);
+      continue;
+    }
     if (hv && !data[field]) {
       (data as Record<string, unknown>)[field] = hv;
       confidence[field] = Math.max(confidence[field] ?? 0, heuristic.confidence[field] ?? 80);
     }
+  }
+
+  const parsedTotal = parseTotalAmountFromText(ocrText);
+  if (parsedTotal > 0) {
+    data.totalAmount = parsedTotal;
+    confidence.totalAmount = Math.max(confidence.totalAmount ?? 0, 90);
+  }
+
+  if (data.payrollPeriod) {
+    data.payrollPeriod = normalizePayrollPeriod(data.payrollPeriod);
   }
 
   return { data, confidence };
@@ -101,12 +160,12 @@ export function localExtract(ocrText: string): { data: ExtractedTimesheetData; c
     confidence.employeeId = 90;
   }
 
+  const nameLine = ocrText.match(/employee\s*name\s*[:\-]\s*(.+)/i);
   const name =
-    ocrText.match(/(?:employee\s*name|name)[:\s]+([A-Za-z\s.'-]+)/i) ||
-    ocrText.match(/Please invoice for\s+([A-Za-z\s.'-]+),/i) ||
-    ocrText.match(/Employee Name:\s*([A-Za-z\s.'-]+)/i);
-  if (name) {
-    data.employeeName = name[1].trim().split('\n')[0].trim();
+    (nameLine && { 1: cleanEmployeeName(nameLine[1]) }) ||
+    ocrText.match(/Please invoice for\s+([A-Za-z\s.'-]+),/i);
+  if (name && name[1]) {
+    data.employeeName = cleanEmployeeName(name[1]);
     confidence.employeeName = 85;
   }
 
@@ -141,15 +200,27 @@ export function localExtract(ocrText: string): { data: ExtractedTimesheetData; c
     confidence.overtime = 88;
   }
 
+  const reimbExplicit = parseReimbursementsFromText(ocrText);
+  if (reimbExplicit > 0) {
+    data.reimbursements = reimbExplicit;
+    confidence.reimbursements = 90;
+  }
+
+  const totalAmt = parseTotalAmountFromText(ocrText);
+  if (totalAmt > 0) {
+    data.totalAmount = totalAmt;
+    confidence.totalAmount = 90;
+  }
+
   const reimb = [...ocrText.matchAll(/AED\s*([\d,.]+)/gi)];
-  if (reimb.length > 1) {
+  if (reimb.length > 1 && !data.reimbursements) {
     data.reimbursements = parseFloat(reimb[reimb.length - 1][1].replace(/,/g, ''));
     confidence.reimbursements = 75;
   }
 
-  const period = ocrText.match(/(?:period|month|june)[:\s]*(June\s*2026|June2026)/i);
+  const period = ocrText.match(/(?:period|month|payroll\s*period)[:\s]*(June\s*2026|June2026)/i);
   if (period) {
-    data.payrollPeriod = 'June2026';
+    data.payrollPeriod = normalizePayrollPeriod(period[1]);
     confidence.payrollPeriod = 92;
   }
 

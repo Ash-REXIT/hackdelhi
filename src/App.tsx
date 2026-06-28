@@ -19,11 +19,10 @@ import { ReviewQueue } from './pages/ReviewQueue';
 import { ReviewSession } from './pages/ReviewSession';
 import { ERPQueue } from './pages/ERPQueue';
 import { DispatchCenter } from './pages/DispatchCenter';
-import { ClientConfiguration } from './pages/ClientConfiguration';
 import { BusinessRules } from './pages/BusinessRules';
 import { MasterData } from './pages/MasterData';
-import { Invoices } from './pages/Invoices'; // Will be removed or repurposed
-import { Clients } from './pages/Clients'; // Will be removed or repurposed
+import { Invoices } from './pages/Invoices';
+import { Clients } from './pages/Clients';
 import { Knowledge } from './pages/Knowledge';
 import { Reports } from './pages/Reports';
 import { DataView } from './pages/DataView';
@@ -88,7 +87,7 @@ function App() {
               <Route path="/review/:id" element={<ReviewSession />} />
               <Route path="/erp" element={<ERPQueue />} />
               <Route path="/dispatch" element={<DispatchCenter />} />
-              <Route path="/clients" element={<ClientConfiguration />} />
+              <Route path="/clients" element={<Clients />} />
               <Route path="/rules" element={<BusinessRules />} />
               <Route path="/master-data" element={<MasterData />} />
               <Route path="/analytics" element={<Reports />} />

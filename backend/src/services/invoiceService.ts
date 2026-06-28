@@ -1,10 +1,17 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import QRCode from 'qrcode';
 import fs from 'fs/promises';
 import path from 'path';
+import QRCode from 'qrcode';
 import { prisma } from '../lib/prisma';
 import { config } from '../lib/config';
 import { addTimelineEvent } from './timelineService';
+import {
+  buildPreviewInvoiceData,
+  getTemplateMeta,
+  renderInvoicePdfBytes,
+  resolveClientTemplate,
+  type InvoicePdfInput,
+  type InvoiceTemplateId,
+} from './invoiceTemplateService';
 
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true });
@@ -16,6 +23,76 @@ function generateInvoiceNumber(): string {
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
   return `FIA-${y}${m}-${rand}`;
+}
+
+function toPdfInput(
+  invoice: {
+    invoiceNumber: string;
+    subtotal: { toString(): string };
+    taxAmount: { toString(): string };
+    grandTotal: { toString(): string };
+    currency: string;
+    payrollPeriod: string | null;
+    client: {
+      name: string;
+      clientCode: string;
+      address: string | null;
+      email: string | null;
+      city?: string | null;
+      industry?: string | null;
+    };
+    items: Array<{
+      description: string;
+      quantity: { toString(): string };
+      unitPrice: { toString(): string };
+      amount: { toString(): string };
+    }>;
+  }
+): InvoicePdfInput {
+  return {
+    invoiceNumber: invoice.invoiceNumber,
+    subtotal: Number(invoice.subtotal),
+    taxAmount: Number(invoice.taxAmount),
+    grandTotal: Number(invoice.grandTotal),
+    currency: invoice.currency,
+    payrollPeriod: invoice.payrollPeriod,
+    client: {
+      name: invoice.client.name,
+      clientCode: invoice.client.clientCode,
+      address: invoice.client.address,
+      email: invoice.client.email,
+      city: invoice.client.city,
+      industry: invoice.client.industry,
+    },
+    items: invoice.items.map((item) => ({
+      description: item.description,
+      quantity: Number(item.quantity),
+      unitPrice: Number(item.unitPrice),
+      amount: Number(item.amount),
+    })),
+  };
+}
+
+export async function renderClientTemplatePreview(clientId: string): Promise<Buffer> {
+  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) throw new Error('Client not found');
+
+  const templateId = resolveClientTemplate(client.clientCode);
+  const input = buildPreviewInvoiceData(client);
+  const bytes = await renderInvoicePdfBytes(input, templateId);
+  return Buffer.from(bytes);
+}
+
+export async function getClientTemplateInfo(clientId: string) {
+  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  if (!client) throw new Error('Client not found');
+  const templateId = resolveClientTemplate(client.clientCode);
+  return {
+    clientId: client.id,
+    clientCode: client.clientCode,
+    clientName: client.name,
+    template: getTemplateMeta(templateId),
+  };
 }
 
 export async function generateInvoice(timesheetId: string) {
@@ -53,18 +130,17 @@ export async function generateInvoice(timesheetId: string) {
 
   const regularAmount = workingDays * dailyRate;
   const overtimeAmount =
-    overtime > 0
-      ? overtime * (dailyRate / 8) * 1.5
-      : Number(payroll?.overtimeAmount || 0);
+    overtime > 0 ? overtime * (dailyRate / 8) * 1.5 : Number(payroll?.overtimeAmount || 0);
   const subtotal = regularAmount + overtimeAmount + reimbursements;
   const taxRate = Number(timesheet.client.taxRate);
   const taxAmount = subtotal * (taxRate / 100);
   const grandTotal = subtotal + taxAmount;
 
   const invoiceNumber = generateInvoiceNumber();
+  const templateId = resolveClientTemplate(timesheet.client.clientCode);
   const items = [
     {
-      description: `Monthly timesheet - ${timesheet.employee?.name || 'Employee'} (${workingDays} days @ AED ${dailyRate.toFixed(2)}/day)`,
+      description: `Monthly timesheet - ${timesheet.employee?.name || 'Employee'} (${workingDays} days @ ${timesheet.client.currency} ${dailyRate.toFixed(2)}/day)`,
       quantity: workingDays,
       unitPrice: dailyRate,
       amount: regularAmount,
@@ -113,13 +189,14 @@ export async function generateInvoice(timesheetId: string) {
   const qrData = JSON.stringify({
     invoiceNumber,
     client: timesheet.client.name,
+    template: templateId,
     total: grandTotal,
     currency: timesheet.client.currency,
     date: new Date().toISOString(),
   });
 
   const qrCodeDataUrl = await QRCode.toDataURL(qrData);
-  const pdfPath = await renderInvoicePdf(invoice, qrCodeDataUrl);
+  const pdfPath = await saveInvoicePdf(invoice, templateId, qrCodeDataUrl);
 
   await prisma.invoice.update({
     where: { id: invoice.id },
@@ -129,7 +206,11 @@ export async function generateInvoice(timesheetId: string) {
   await addTimelineEvent(invoice.id, 'UPLOADED', 'Timesheet uploaded');
   await addTimelineEvent(invoice.id, 'OCR_COMPLETED', 'Document processed');
   await addTimelineEvent(invoice.id, 'VALIDATED', 'Validation passed');
-  await addTimelineEvent(invoice.id, 'INVOICE_GENERATED', `Invoice ${invoiceNumber} generated`);
+  await addTimelineEvent(
+    invoice.id,
+    'INVOICE_GENERATED',
+    `Invoice ${invoiceNumber} generated (${getTemplateMeta(templateId).label} template)`
+  );
   await addTimelineEvent(invoice.id, 'APPROVED', 'Processing completed — ready for dispatch');
 
   return prisma.invoice.findUnique({
@@ -138,7 +219,7 @@ export async function generateInvoice(timesheetId: string) {
   });
 }
 
-async function renderInvoicePdf(
+async function saveInvoicePdf(
   invoice: {
     invoiceNumber: string;
     subtotal: { toString(): string };
@@ -146,67 +227,49 @@ async function renderInvoicePdf(
     grandTotal: { toString(): string };
     currency: string;
     payrollPeriod: string | null;
-    client: { name: string; address: string | null; email: string | null };
-    items: Array<{ description: string; quantity: { toString(): string }; unitPrice: { toString(): string }; amount: { toString(): string } }>;
+    client: {
+      name: string;
+      clientCode: string;
+      address: string | null;
+      email: string | null;
+      city?: string | null;
+      industry?: string | null;
+    };
+    items: Array<{
+      description: string;
+      quantity: { toString(): string };
+      unitPrice: { toString(): string };
+      amount: { toString(): string };
+    }>;
   },
+  templateId: InvoiceTemplateId,
   qrCodeDataUrl: string
 ): Promise<string> {
   await ensureDir(config.generatedDir);
-
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  const { width, height } = page.getSize();
-  let y = height - 50;
-
-  page.drawText('TOUCHLESS INVOICE AGENT', { x: 50, y, size: 10, font, color: rgb(0.4, 0.4, 0.9) });
-  y -= 30;
-  page.drawText('INVOICE', { x: 50, y, size: 28, font: fontBold, color: rgb(0.1, 0.1, 0.2) });
-  y -= 25;
-  page.drawText(invoice.invoiceNumber, { x: 50, y, size: 12, font, color: rgb(0.3, 0.3, 0.4) });
-
-  page.drawText(`Bill To: ${invoice.client.name}`, { x: 50, y: y - 40, size: 11, font: fontBold });
-  if (invoice.client.address) {
-    page.drawText(invoice.client.address, { x: 50, y: y - 55, size: 9, font, color: rgb(0.4, 0.4, 0.5) });
-  }
-
-  y -= 100;
-  page.drawText('Description', { x: 50, y, size: 10, font: fontBold });
-  page.drawText('Qty', { x: 300, y, size: 10, font: fontBold });
-  page.drawText('Rate', { x: 370, y, size: 10, font: fontBold });
-  page.drawText('Amount', { x: 470, y, size: 10, font: fontBold });
-  y -= 5;
-  page.drawLine({ start: { x: 50, y }, end: { x: 545, y }, thickness: 1, color: rgb(0.85, 0.85, 0.9) });
-  y -= 20;
-
-  for (const item of invoice.items) {
-    page.drawText(item.description.slice(0, 40), { x: 50, y, size: 9, font });
-    page.drawText(Number(item.quantity).toFixed(1), { x: 300, y, size: 9, font });
-    page.drawText(`${invoice.currency} ${Number(item.unitPrice).toFixed(2)}`, { x: 370, y, size: 9, font });
-    page.drawText(`${invoice.currency} ${Number(item.amount).toFixed(2)}`, { x: 470, y, size: 9, font });
-    y -= 18;
-  }
-
-  y -= 20;
-  page.drawText(`Subtotal: ${invoice.currency} ${Number(invoice.subtotal).toFixed(2)}`, { x: 370, y, size: 10, font });
-  y -= 16;
-  page.drawText(`Tax: ${invoice.currency} ${Number(invoice.taxAmount).toFixed(2)}`, { x: 370, y, size: 10, font });
-  y -= 20;
-  page.drawText(`Total: ${invoice.currency} ${Number(invoice.grandTotal).toFixed(2)}`, { x: 370, y, size: 14, font: fontBold, color: rgb(0.2, 0.4, 0.9) });
-
-  if (invoice.payrollPeriod) {
-    page.drawText(`Period: ${invoice.payrollPeriod}`, { x: 50, y: 80, size: 9, font, color: rgb(0.5, 0.5, 0.6) });
-  }
-
-  const qrBase64 = qrCodeDataUrl.split(',')[1];
-  const qrBytes = Buffer.from(qrBase64, 'base64');
-  const qrImage = await pdfDoc.embedPng(qrBytes);
-  page.drawImage(qrImage, { x: width - 120, y: 50, width: 70, height: 70 });
-
-  const pdfBytes = await pdfDoc.save();
+  const input = toPdfInput(invoice);
+  const pdfBytes = await renderInvoicePdfBytes(input, templateId, qrCodeDataUrl);
   const filePath = path.join(config.generatedDir, `${invoice.invoiceNumber}.pdf`);
   await fs.writeFile(filePath, pdfBytes);
   return filePath;
+}
+
+/** Regenerate PDF for an existing invoice using the client's current template. */
+export async function regenerateInvoicePdf(invoiceId: string): Promise<string> {
+  const invoice = await prisma.invoice.findUnique({
+    where: { id: invoiceId },
+    include: { items: true, client: true },
+  });
+  if (!invoice) throw new Error('Invoice not found');
+
+  const templateId = resolveClientTemplate(invoice.client.clientCode);
+  const qrData =
+    invoice.qrCode ||
+    JSON.stringify({
+      invoiceNumber: invoice.invoiceNumber,
+      client: invoice.client.name,
+      template: templateId,
+      total: Number(invoice.grandTotal),
+    });
+  const qrCodeDataUrl = await QRCode.toDataURL(qrData);
+  return saveInvoicePdf(invoice, templateId, qrCodeDataUrl);
 }

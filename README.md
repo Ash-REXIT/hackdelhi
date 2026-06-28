@@ -2,7 +2,20 @@
 
 Full-stack timesheet-to-invoice platform (main branch UI + PostgreSQL backend).
 
-## Quick start (Docker — recommended)
+## Quick start (local dev — use if Docker is broken)
+
+```powershell
+npm install
+npm run setup:ai            # Python deps for ai-service
+npm run setup:db            # schema + seed (needs PostgreSQL on :5432)
+npm run dev                 # frontend :5173 + backend :3001 + ai :8000
+```
+
+**PostgreSQL not installed?** Run `.\scripts\setup-postgres.ps1` (uses `POSTGRES_PASSWORD` from `.env`).
+
+**Optional local AI:** install [Ollama](https://ollama.com), then `ollama pull qwen2.5:7b`. Without Ollama, rule-based fallbacks still work.
+
+## Quick start (Docker — when Docker Desktop works)
 
 Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) or Docker Engine (Linux).
 
@@ -43,19 +56,22 @@ Optional: add `GEMINI_API_KEY` to `.env` (copy from `.env.example`) for cloud AI
 
 | Problem | Fix |
 |---------|-----|
-| `input/output error` or `500 Internal Server Error` during pull | Restart **Docker Desktop**, ensure **~10 GB free disk**, then run `npm run start` again |
-| Ollama model still downloading | App works immediately; AI features improve once pull finishes — check `docker compose logs ollama -f` |
+| Docker Desktop won't open / 500 errors | Run `.\scripts\fix-docker-desktop.ps1` as Admin, or use **local dev** above |
+| `input/output error` during pull | Restart Docker, ensure **~15 GB free disk**, run `npm run start` again |
+| Ollama model still downloading | App works immediately; check `docker compose logs ollama -f` |
 | Port already in use | Stop local Postgres/Node or change ports in `docker-compose.yml` |
 | Fresh rebuild | `npm run docker:reset` |
 
 ## Quick start (local dev, no full Docker)
 
+Same as above — or Postgres-only in Docker if Desktop works:
+
 ```powershell
 npm run docker:db           # PostgreSQL only in Docker
 npm install
-npm run setup:ai            # Python deps for ai-service
-npm run setup:db            # schema + seed
-npm run dev                 # frontend :5173 + backend :3001 + ai :8000
+npm run setup:ai
+npm run setup:db
+npm run dev
 ```
 
 ## Demo logins

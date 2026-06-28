@@ -168,9 +168,16 @@ export function ReviewSession() {
   const flaggedFields = explanations?.flaggedFields;
   const doc = timesheet?.documents?.[0];
   const overtimeHours = resolveOvertimeHours(extracted, timesheet, doc?.ocrText);
+  const hasOvertimeValidationFailure = timesheet?.validationResults?.some(
+    (r) => !r.passed && r.ruleKey === 'max_overtime_hours'
+  );
+  const isAwaitingClient = timesheet?.status === 'PENDING_CLIENT_APPROVAL';
   const showSendForApproval =
-    overtimeHours > OVERTIME_POLICY_HOURS &&
-    !['PENDING_CLIENT_APPROVAL', 'INVOICE_GENERATED', 'DISPATCHED'].includes(timesheet?.status || '');
+    !isAwaitingClient &&
+    !['INVOICE_GENERATED', 'DISPATCHED'].includes(timesheet?.status || '') &&
+    (overtimeHours > OVERTIME_POLICY_HOURS ||
+      hasOvertimeValidationFailure ||
+      Number(timesheet?.overtime || 0) > OVERTIME_POLICY_HOURS);
 
   const sendForClientApproval = async () => {
     if (!id) return;
@@ -262,7 +269,13 @@ export function ReviewSession() {
           <h1 className="text-xl font-semibold">{doc?.fileName}</h1>
           <p className="text-sm text-muted-foreground">{timesheet.client?.name} · {timesheet.status.replace(/_/g, ' ')}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          {isAwaitingClient && (
+            <span className="px-4 py-2 bg-[#F59E0B]/20 text-[#F59E0B] border border-[#F59E0B]/40 rounded-lg text-sm flex items-center gap-2">
+              <Send size={14} />
+              Awaiting client approval
+            </span>
+          )}
           {showSendForApproval && (
             <button
               type="button"
@@ -274,8 +287,12 @@ export function ReviewSession() {
               Send for Approval
             </button>
           )}
-          <button onClick={approve} disabled={loading} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm">Approve</button>
-          <button onClick={reject} disabled={loading} className="px-4 py-2 bg-danger/20 text-danger rounded-lg text-sm">Reject</button>
+          {!isAwaitingClient && (
+            <>
+              <button onClick={approve} disabled={loading || showSendForApproval} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm disabled:opacity-50" title={showSendForApproval ? 'Send to client first for overtime exceptions' : undefined}>Approve</button>
+              <button onClick={reject} disabled={loading} className="px-4 py-2 bg-danger/20 text-danger rounded-lg text-sm">Reject</button>
+            </>
+          )}
         </div>
       </div>
 

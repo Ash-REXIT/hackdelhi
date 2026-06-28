@@ -1,0 +1,11 @@
+June 2026 Timesheet — Carlos Smith
+Employee ID: EMP10001
+Employee Name: Carlos Smith
+Client Code: CL001
+Working Days: 22
+Overtime: 0
+Payroll Period: June 2026
+Total Amount: AED 9834.13
+Reference: FRAUD-DUP-001
+
+Upload this file twice to trigger duplicate document detection on the second upload.

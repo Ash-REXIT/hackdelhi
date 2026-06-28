@@ -212,6 +212,13 @@ async function seedPayroll(sheet: XLSX.WorkSheet): Promise<void> {
     const ot = toNumber(pick(row, 'ot', 'overtime', 'overtime_amount'));
     const deductions = toNumber(pick(row, 'deductions', 'deduction'));
     const baseSalary = gross ?? netPay ?? toNumber(pick(row, 'basic', 'total_ctc')) ?? 0;
+    const workingDays = toNumber(pick(row, 'working_days', 'days', 'working_days_june')) ?? 22;
+    const hourlyFromSheet = toNumber(pick(row, 'hourly_rate', 'hourlyrate', 'rate'));
+    const hourlyRate =
+      hourlyFromSheet ??
+      (gross && workingDays ? gross / (workingDays * 8) : null) ??
+      (netPay && workingDays ? netPay / (workingDays * 8) : null);
+    const overtimeRate = hourlyRate ? hourlyRate * 1.5 : null;
 
     await prisma.payroll.upsert({
       where: { employeeId_period: { employeeId: employee.id, period } },
@@ -221,8 +228,10 @@ async function seedPayroll(sheet: XLSX.WorkSheet): Promise<void> {
         overtimeAmount: ot,
         deductions,
         netPay,
+        hourlyRate,
+        overtimeRate,
         currency: toString(pick(row, 'currency')) || 'AED',
-        workingDays: toNumber(pick(row, 'working_days', 'days', 'working_days_june')),
+        workingDays,
       },
       create: {
         employeeId: employee.id,
@@ -232,10 +241,19 @@ async function seedPayroll(sheet: XLSX.WorkSheet): Promise<void> {
         overtimeAmount: ot,
         deductions,
         netPay,
+        hourlyRate,
+        overtimeRate,
         currency: toString(pick(row, 'currency')) || 'AED',
-        workingDays: toNumber(pick(row, 'working_days', 'days', 'working_days_june')),
+        workingDays,
       },
     });
+
+    if (hourlyRate) {
+      await prisma.employee.update({
+        where: { id: employee.id },
+        data: { hourlyRate },
+      });
+    }
     count++;
   }
 

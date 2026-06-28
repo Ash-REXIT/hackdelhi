@@ -27,7 +27,10 @@ const PORTAL_NAV = [
 export function PortalSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const companyName = user?.client?.name || 'Client Portal';
+  const portalInitial = companyName.charAt(0).toUpperCase();
+  const portalTitle = user?.client?.name ? `${user.client.name.split(' ')[0]} Portal` : 'Client Portal';
   const [approvalCount, setApprovalCount] = useState(0);
   const [invoiceCount, setInvoiceCount] = useState(0);
 
@@ -55,9 +58,11 @@ export function PortalSidebar() {
       <div className="h-16 flex items-center px-6 border-b border-[#2A3442]/50 shrink-0">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-sm">
-            I
+            {portalInitial}
           </div>
-          <span className="font-semibold text-[15px] text-foreground tracking-tight">Infosys Portal</span>
+          <span className="font-semibold text-[15px] text-foreground tracking-tight truncate max-w-[140px]" title={companyName}>
+            {portalTitle}
+          </span>
         </div>
       </div>
 

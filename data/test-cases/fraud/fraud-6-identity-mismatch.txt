@@ -1,0 +1,16 @@
+From: john.smith@contractor.com
+To: billing@tasc.com
+Subject: June 2026 payout request
+
+Employee ID: EMP10001
+Employee Name: John Smith
+Client Code: CL001
+Working days: 22
+Overtime hours: 0
+Payroll Period: June 2026
+Total Amount: AED 9834.13
+
+Please process my June payout.
+
+Thanks,
+John Smith

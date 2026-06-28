@@ -1,0 +1,18 @@
+From: accounts@emiratessteelindustriesllc.com
+To: billing@tasc.com
+Subject: Payout Request — June 2026
+
+Dear TASC Finance,
+
+Please process the June 2026 payout for:
+
+Employee ID: EMP10001
+Employee Name: Carlos Smith
+Client Code: CL001
+Period: June 2026
+Working Days: 32
+Overtime hours: 0
+Total Amount: AED 9834.13
+
+Regards,
+Emirates Steel Industries LLC Accounts

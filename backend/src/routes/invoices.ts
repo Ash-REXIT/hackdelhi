@@ -6,6 +6,8 @@ import { dispatchInvoice } from '../services/emailService';
 import { addTimelineEvent } from '../services/timelineService';
 import { logAudit } from '../services/auditService';
 import { routeParams } from '../lib/request';
+import { regenerateInvoicePdf } from '../services/invoiceService';
+import { getTemplateMeta, resolveClientTemplate } from '../services/invoiceTemplateService';
 
 const router = Router();
 
@@ -41,7 +43,7 @@ router.get('/', authenticate, async (req, res, next) => {
     const invoices = await prisma.invoice.findMany({
       where,
       include: {
-        client: { select: { id: true, name: true, clientCode: true, email: true } },
+        client: { select: { id: true, name: true, clientCode: true, email: true, industry: true } },
         timesheet: {
           select: {
             id: true,
@@ -90,13 +92,44 @@ router.get('/:id', authenticate, async (req, res, next) => {
 
 router.get('/:id/pdf', authenticate, async (req, res, next) => {
   try {
-    const invoice = await prisma.invoice.findUnique({ where: { id: routeParams(req).id } });
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: routeParams(req).id },
+      include: { client: true },
+    });
     if (!invoice) return res.status(404).json({ success: false, error: 'Not found' });
     if (req.tiaUser!.role === 'CLIENT' && invoice.clientId !== req.tiaUser!.clientId) {
       return res.status(403).json({ success: false, error: 'Forbidden' });
     }
-    if (!invoice.pdfPath) return res.status(404).json({ success: false, error: 'PDF not found' });
-    res.sendFile(path.resolve(invoice.pdfPath));
+
+    let pdfPath = invoice.pdfPath;
+    if (!pdfPath) {
+      pdfPath = await regenerateInvoicePdf(invoice.id);
+    }
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${invoice.invoiceNumber}.pdf"`);
+    res.sendFile(path.resolve(pdfPath));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/template', authenticate, async (req, res, next) => {
+  try {
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: routeParams(req).id },
+      include: { client: true },
+    });
+    if (!invoice) return res.status(404).json({ success: false, error: 'Not found' });
+    const templateId = resolveClientTemplate(invoice.client.clientCode);
+    res.json({
+      success: true,
+      data: {
+        template: getTemplateMeta(templateId),
+        clientCode: invoice.client.clientCode,
+        clientName: invoice.client.name,
+      },
+    });
   } catch (err) {
     next(err);
   }

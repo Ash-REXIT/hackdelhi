@@ -5,6 +5,7 @@ export interface ExtractedTimesheetData {
   workingDays?: number;
   overtime?: number;
   reimbursements?: number;
+  totalAmount?: number;
   payrollPeriod?: string;
 }
 

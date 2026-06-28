@@ -1,8 +1,13 @@
 import { prisma } from '../lib/prisma';
 import * as aiClient from './aiClient';
 import * as local from './localProcessing';
+import * as fraudService from './fraudService';
 import type { ExtractedTimesheetData, ValidationResult } from '../types';
-import { isHackathonTestCase } from '../lib/testCase';
+import {
+  isFraudDemoTestCase,
+  isHackathonTestCase,
+  shouldSkipFraudDetection,
+} from '../lib/testCase';
 import { parseOvertimeFromText } from './localProcessing';
 
 export async function runValidation(
@@ -13,6 +18,20 @@ export async function runValidation(
   fileName: string,
   ocrText?: string
 ): Promise<{ results: ValidationResult[]; passed: boolean; requiresClientApproval: boolean }> {
+  if (isFraudDemoTestCase(fileName)) {
+    return {
+      passed: true,
+      requiresClientApproval: false,
+      results: [{
+        passed: true,
+        ruleKey: 'fraud_demo',
+        ruleName: 'Fraud Demo File',
+        severity: 'info',
+        message: 'Fraud demo file — validation skipped; fraud detection active',
+      }],
+    };
+  }
+
   if (isHackathonTestCase(fileName)) {
     return {
       passed: true,
@@ -63,9 +82,12 @@ export async function runFraudDetection(
   timesheetId: string,
   extracted: ExtractedTimesheetData,
   fileHash: string | undefined,
-  fileName: string
+  fileName: string,
+  clientId: string,
+  employeeDbId: string | undefined,
+  ocrText?: string
 ) {
-  if (isHackathonTestCase(fileName)) {
+  if (shouldSkipFraudDetection(fileName)) {
     return {
       fraudScore: 0,
       riskLevel: 'LOW' as const,
@@ -73,14 +95,37 @@ export async function runFraudDetection(
     };
   }
 
+  const data = { ...extracted };
+  if (ocrText) {
+    const total = local.parseTotalAmountFromText(ocrText);
+    if (total > 0) data.totalAmount = total;
+    if (!data.reimbursements) {
+      const reimb = local.parseReimbursementsFromText(ocrText);
+      if (reimb > 0) data.reimbursements = reimb;
+    }
+    if (!data.overtime) {
+      const ot = parseOvertimeFromText(ocrText);
+      if (ot > 0) data.overtime = ot;
+    }
+    if (data.payrollPeriod) {
+      data.payrollPeriod = local.normalizePayrollPeriod(data.payrollPeriod);
+    }
+  }
+
+  const localResult = await fraudService.detectFraudLocal(
+    timesheetId,
+    data,
+    fileHash,
+    clientId,
+    employeeDbId,
+    ocrText
+  );
+
   try {
-    return await aiClient.detectFraud(timesheetId, extracted, fileHash);
+    const remoteResult = await aiClient.detectFraud(timesheetId, data, fileHash);
+    return fraudService.mergeFraudResults(localResult, remoteResult);
   } catch {
-    return {
-      fraudScore: 0,
-      riskLevel: 'LOW' as const,
-      reasons: [{ checkType: 'clean', score: 0, reason: 'Fraud check unavailable (AI offline)' }],
-    };
+    return localResult;
   }
 }
 

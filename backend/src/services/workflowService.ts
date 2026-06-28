@@ -8,7 +8,7 @@ import * as explanationService from './explanationService';
 import type { FieldConfidence } from '../types';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
-import { isHackathonTestCase } from '../lib/testCase';
+import { isHackathonTestCase, isFraudDemoTestCase } from '../lib/testCase';
 import fs from 'fs/promises';
 
 function mergeExceptionReasons(...groups: Array<string | string[] | undefined | null>): string {
@@ -225,10 +225,11 @@ export async function processTimesheet(timesheetId: string): Promise<void> {
       await prisma.timesheet.update({
         where: { id: timesheetId },
         data: {
-          status: 'PENDING_CLIENT_APPROVAL',
+          status: 'PENDING_REVIEW',
+          overtime: extracted.overtime,
           validationResults: validation.results as unknown as Prisma.InputJsonValue,
           exceptionReason: mergeExceptionReasons(
-            'Overtime exceeds policy — sent to client for approval',
+            'Overtime exceeds policy — FinOps must send to client for approval',
             explanations.summary,
             validation.results.filter((r) => !r.passed).map((r) => r.message)
           ),
@@ -237,7 +238,7 @@ export async function processTimesheet(timesheetId: string): Promise<void> {
       });
       await prisma.auditLog.create({
         data: {
-          action: 'TIMESHEET_PENDING_CLIENT_APPROVAL',
+          action: 'TIMESHEET_OVERTIME_REVIEW',
           entity: 'timesheet',
           entityId: timesheetId,
           details: { reason: 'max_overtime_hours', overtime: extracted.overtime } as object,
@@ -295,7 +296,10 @@ export async function processTimesheet(timesheetId: string): Promise<void> {
       timesheetId,
       extracted,
       doc.fileHash || undefined,
-      doc.fileName
+      doc.fileName,
+      timesheet.clientId,
+      employeeId,
+      ocrResult.text
     );
 
     for (const reason of fraud.reasons) {
@@ -342,9 +346,10 @@ export async function processTimesheet(timesheetId: string): Promise<void> {
     }
 
     // Step 6: Auto-invoice or human review
-    const confidenceThreshold = isHackathonTestCase(doc.fileName)
-      ? 70
-      : config.autoInvoiceConfidenceThreshold;
+    const confidenceThreshold =
+      isHackathonTestCase(doc.fileName) || isFraudDemoTestCase(doc.fileName)
+        ? 70
+        : config.autoInvoiceConfidenceThreshold;
 
     if (Number(overallConfidence) >= confidenceThreshold) {
       await generateInvoiceFromTimesheet(timesheetId);

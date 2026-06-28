@@ -13,6 +13,8 @@ Upload these from **Client Portal → Upload** (`user@client.com`).
 | 6 Structured email | `case-6/case6-email-structured.txt` | All fields present |
 | 7 Clean Excel | `case-7/case7-complete-timesheet.xlsx` | Full match — should auto-invoice |
 
+See also: **[Fraud demo timesheets](fraud/FRAUD-SAMPLES.md)** (`fraud-1` … `fraud-6`) for fraud detection testing.
+
 ## Demo logins
 
 | Role | Email |

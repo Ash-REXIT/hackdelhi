@@ -1,6 +1,11 @@
-import { Building, CreditCard, Users, Bell, Shield } from 'lucide-react';
+import { Building, Users, Bell, Shield } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function PortalAccount() {
+  const { user } = useAuth();
+  const companyName = user?.client?.name || 'Emirates Steel Industries LLC';
+  const clientCode = user?.client?.clientCode || 'CL001';
+
   return (
     <div className="p-12 w-full max-w-4xl mx-auto h-full overflow-y-auto">
       <div className="mb-10">
@@ -9,8 +14,6 @@ export function PortalAccount() {
       </div>
 
       <div className="space-y-8">
-        
-        {/* Company Info */}
         <section className="bg-[#1D2430] border border-[#2A3442]/60 rounded-2xl p-8 shadow-sm">
           <div className="flex items-center space-x-3 mb-6">
             <Building className="text-primary" size={20} />
@@ -19,24 +22,21 @@ export function PortalAccount() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Company Name</label>
-              <div className="p-3 bg-[#151A21] border border-[#2A3442]/50 rounded-lg text-sm text-foreground">Infosys Limited</div>
+              <div className="p-3 bg-[#151A21] border border-[#2A3442]/50 rounded-lg text-sm text-foreground">{companyName}</div>
             </div>
             <div>
-              <label className="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Primary Industry</label>
-              <div className="p-3 bg-[#151A21] border border-[#2A3442]/50 rounded-lg text-sm text-foreground">Information Technology</div>
+              <label className="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Client Code</label>
+              <div className="p-3 bg-[#151A21] border border-[#2A3442]/50 rounded-lg text-sm text-foreground font-mono">{clientCode}</div>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Billing Address</label>
+              <label className="block text-xs font-mono text-muted-foreground uppercase tracking-widest mb-2">Portal User</label>
               <div className="p-3 bg-[#151A21] border border-[#2A3442]/50 rounded-lg text-sm text-foreground">
-                Electronics City, Hosur Road<br />
-                Bengaluru, Karnataka 560100<br />
-                India
+                {user?.name || user?.email || 'Client User'}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Assigned Team */}
         <section className="bg-[#1D2430] border border-[#2A3442]/60 rounded-2xl p-8 shadow-sm">
           <div className="flex items-center space-x-3 mb-6">
             <Users className="text-primary" size={20} />
@@ -58,7 +58,6 @@ export function PortalAccount() {
           </div>
         </section>
 
-        {/* Quick Settings Toggles */}
         <section className="bg-[#1D2430] border border-[#2A3442]/60 rounded-2xl p-8 shadow-sm">
           <div className="space-y-6">
             <div className="flex items-center justify-between pb-6 border-b border-[#2A3442]/50">
@@ -88,7 +87,6 @@ export function PortalAccount() {
             </div>
           </div>
         </section>
-
       </div>
     </div>
   );
